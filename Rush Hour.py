@@ -43,7 +43,7 @@ class Board:
         self.mainPos = (0, 0)
 
     def hasWon(self):
-        if(self.mainPos[0] == self.goalPos[0]-2):
+        if(self.mainPos[0]+1 == self.goalPos[0]):
             return True
         else:
             return False
@@ -126,30 +126,43 @@ class Board:
             vehicle.position = (pos[0], pos[1] - amount)
             if(self.checkCollision(vehicle) == False):
                 self.updateVehicle(vehicle)
+                return True
             else:
                 vehicle.position = pos
+                return False
         else:
             vehicle.position = (pos[0] - amount, pos[1])
             if(self.checkCollision(vehicle) == False):
                 self.updateVehicle(vehicle)
+                return True
             else:
                 vehicle.position = pos
+                return False
 
     def moveVehicleRightDown(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
+        # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+        if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
+            # SETS UP WIN STATE
+            self.mainPos = (self.mainPos[0]+1, self.mainPos[1])
+            return True
         pos = (vehicle.position[0], vehicle.position[1])
         if(vehicle.orientation == "v"):
             vehicle.position = (pos[0], pos[1] + amount)
             if(self.checkCollision(vehicle) == False):
                 self.updateVehicle(vehicle)
+                return True
             else:
                 vehicle.position = pos
+                return False
         else:
             vehicle.position = (pos[0] + amount, pos[1])
             if(self.checkCollision(vehicle) == False):
                 self.updateVehicle(vehicle)
+                return True
             else:
                 vehicle.position = pos
+                return False
 
 
 _VARS = {'surf': False, 'gridWH': 400,
