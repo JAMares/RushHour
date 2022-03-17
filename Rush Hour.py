@@ -10,6 +10,7 @@ import numpy as np
 SCREENSIZE = WIDTH, HEIGHT = 800, 600
 
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 GREY = (160, 160, 160)
@@ -196,9 +197,17 @@ def placeCells():
                 y = _VARS['gridOrigin'][1] + (celldimX*column) + cellBorder + (
                     2*column*cellBorder) + _VARS['lineWidth']/2
                 drawSquareCell(x, y, celldimX, celldimY, v.color)
+
+                # DRAWING CORRESPONDING ID FOR EACH VEHICLE CELL
                 font = pygame.font.SysFont('arial', 15)
-                text = font.render(
-                    str(BOARD.boardMAP[row][column]), True, (0, 0, 0))
+                vId = BOARD.boardMAP[row][column]
+                # IF VEHICLE IS SELECTED, DRAW THE TEXT WHITE
+                if(vId == CURR_VEHICLE):
+                    text = font.render(
+                        str(vId), True, WHITE)
+                else:
+                    text = font.render(
+                        str(vId), True, BLACK)
                 _VARS['surf'].blit(text, (x+cellBorder, y))
     # WIN CELL
     if(BOARD.hasWon() == False):
@@ -275,16 +284,19 @@ def checkEvents():
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()
             sys.exit()
+        # MOVE SELECTED VEHICLE LEFT OR UP DEPENDING ON ORIENTATION
         elif event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_UP):
             if(CURR_VEHICLE == -1):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
+        # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
         elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
             if(CURR_VEHICLE == -1):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
+        # SELECT VEHICLE WITH ID BETWEEN 1 AND 9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
 
