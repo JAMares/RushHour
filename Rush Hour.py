@@ -43,6 +43,7 @@ class Board:
         self.mainPos = (0, 0)
 
     def hasWon(self):
+        # CHECKS IF FRONT OF MAIN VEHICLE COLLIDES WITH GOAL POSITION
         if(self.mainPos[0]+1 == self.goalPos[0]):
             return True
         else:
@@ -52,16 +53,21 @@ class Board:
         x = vehicle.position[0]
         y = vehicle.position[1]
         size = vehicle.size
+        # CHECK ORIENTATION OF VEHICLE (VERTICAL OR HORIZONTAL)
         if(vehicle.orientation == "h"):
+            # CHECKS FOR COLLISION WITH THE LEFT AND RIGHT BORDERS OF THE GAME BOARD
             if(x+size > self.boardMAP.shape[0] or x < 0):
                 return True
+            # CHECKS FOR COLLISIONS WITH EXISTING CARS IN THE GAME BOARD X AXIS
             for i in range(0, size):
                 id = self.boardMAP[x+i][y]
                 if(id != vehicle.identification and id != 0):
                     return True
         else:
+            # CHECKS FOR COLLISION WITH THE TOP AND BOTTOM BORDERS OF THE GAME BOARD
             if(y+size > self.boardMAP.shape[1] or y < 0):
                 return True
+            # CHECKS FOR COLLISIONS WITH EXISTING CARS IN THE GAME BOARD Y AXIS
             for i in range(0, size):
                 id = self.boardMAP[x][y+i]
                 if(id != vehicle.identification and id != 0):
@@ -69,21 +75,31 @@ class Board:
         return False
 
     def generatePuzzle(self, filePath):
+        # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
         self.colors = random.sample(COLOR_SELECTION, 15)
+        # CLEARS VEHICLES
+        self.vehicles.clear()
+        # CLEARS BOARD
+        self.boardMAP = np.zeros(
+            (self.boardMAP.shape[0], self.boardMAP.shape[1]), dtype=int)
+
         f = open(filePath, "r")
         list = f.read().split(" ")
         for v in list:
             id = len(self.vehicles) + 1
             vehicle = Vehicle(id, 0, (int(
                 v[0]), int(v[1])), int(v[2]), v[3])
-            if(id == 1):
-                vehicle.color = RED
+            if(id == 1):  # FIRST VEHICLE IS ALWAYS THE MAIN ONE
+                vehicle.color = RED  # FIRST VEHICLE ALWAYS RED
                 self.mainPos = vehicle.position
             else:
+                # MATCHES EACH VEHICLE ID WITH A COLOR FROM THE LIST
                 vehicle.color = self.colors[id]
 
+            # TEST TO VERIFY IF INSERTION OF VEHICLE HAPPENED WITHOUT COLLISIONS
             test = self.insertVehicle(vehicle)
             if(test == False):
+                # THIS SHOULD BE CHANGED TO A POP-UP MESSAGE
                 raise SystemExit(str("Vehicle collision detected"))
 
     def insertVehicle(self, vehicle):
@@ -100,16 +116,22 @@ class Board:
             for j in range(0, self.boardMAP.shape[1]):
                 if(self.boardMAP[i][j] == vehicle.identification):
                     self.boardMAP[i][j] = 0
-        # PLACE VEHICLE IN NEW POSITION
+        # PLACING VEHICLE IN NEW POSITION
         x = vehicle.position[0]
         y = vehicle.position[1]
         size = vehicle.size
+        # CHECKS ORIENTATION
         if(vehicle.orientation == "h"):
+            # PUTS VEHICLE ID (int > 0) AS VALUE OF CORRESPONDING GRID POSITION
             for i in range(0, size):
+                # FOR LOOP ACCOUNTS FOR SIZE OF VEHICLE
                 self.boardMAP[x+i][y] = vehicle.identification
         else:
+            # PUTS VEHICLE ID (int > 0) AS VALUE OF CORRESPONDING GRID POSITION
             for i in range(0, size):
+                # FOR LOOP ACCOUNTS FOR SIZE OF VEHICLE
                 self.boardMAP[x][y+i] = vehicle.identification
+        # CHECKS IF THIS IS THE MAIN VEHICLE AND UPDATES THE STORED POSITION
         if(vehicle.isMain == True):
             self.mainPos = vehicle.position
 
@@ -121,21 +143,29 @@ class Board:
 
     def moveVehicleLeftUp(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
+        # COPIES OLD POSITION
         pos = (vehicle.position[0], vehicle.position[1])
+        # CHECKS ORIENTATION OF VEHICLE
         if(vehicle.orientation == "v"):
+            # MOVES VEHICLE UP
             vehicle.position = (pos[0], pos[1] - amount)
             if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
                 self.updateVehicle(vehicle)
                 return True
             else:
+                # IF COLLISION DETECTED POSITION STAYS THE SAME
                 vehicle.position = pos
                 return False
         else:
+            # MOVES VEHICLE LEFT
             vehicle.position = (pos[0] - amount, pos[1])
             if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
                 self.updateVehicle(vehicle)
                 return True
             else:
+                # IF COLLISION DETECTED POSITION STAYS THE SAME
                 vehicle.position = pos
                 return False
 
@@ -146,18 +176,24 @@ class Board:
             # SETS UP WIN STATE
             self.mainPos = (self.mainPos[0]+1, self.mainPos[1])
             return True
+        # COPIES OLD POSITION
         pos = (vehicle.position[0], vehicle.position[1])
+        # CHECKS ORIENTATION OF VEHICLE
         if(vehicle.orientation == "v"):
+            # MOVES VEHICLE DOWN
             vehicle.position = (pos[0], pos[1] + amount)
             if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
                 self.updateVehicle(vehicle)
                 return True
             else:
                 vehicle.position = pos
                 return False
         else:
+            # MOVES VEHICLE RIGHT
             vehicle.position = (pos[0] + amount, pos[1])
             if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
                 self.updateVehicle(vehicle)
                 return True
             else:
@@ -165,17 +201,22 @@ class Board:
                 return False
 
 
+# SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
          'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
+# CURRENT SELECTED VEHICLE
 global CURR_VEHICLE
+# INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 BOARD = Board(6, (6, 2))
 
 
 def main():
     global CURR_VEHICLE
+    # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     pygame.init()
 
+    # THIS SHOULD BE CHANGED TO A SELECTION WITHIN THE WINDOW
     BOARD.generatePuzzle("./problems.txt")
 
     _VARS['gridCells'] = BOARD.boardMAP.shape[0]
@@ -188,8 +229,10 @@ def main():
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells()
         pygame.display.update()
+        # CHECKS FOR WIN STATE
         if(BOARD.hasWon() == True):
             print("GAME WON")
+            # SHOULD CHANGE TO A POP-UP MESSAGE AND CLEARING OF THE BOARD
             return
 
 
@@ -201,9 +244,8 @@ def placeCells():
     # DOUBLE LOOP
     for row in range(BOARD.boardMAP.shape[0]):
         for column in range(BOARD.boardMAP.shape[1]):
-            # Is the grid cell tiled ?
+            # CHECKS IF VEHICLES ARE WITHIN A TILE
             if(BOARD.boardMAP[row][column] != 0):
-                # print((row, column))
                 v = BOARD.getVehicle(BOARD.boardMAP[row][column])
                 x = _VARS['gridOrigin'][0] + (celldimY*row) + cellBorder + \
                     (2*row*cellBorder) + _VARS['lineWidth']/2
@@ -222,7 +264,7 @@ def placeCells():
                     text = font.render(
                         str(vId), True, BLACK)
                 _VARS['surf'].blit(text, (x+cellBorder, y))
-    # WIN CELL
+    # DRAW WIN TILE
     if(BOARD.hasWon() == False):
         drawSquareCell(
             _VARS['gridOrigin'][0] + (celldimY*BOARD.goalPos[0])
