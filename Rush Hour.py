@@ -221,6 +221,7 @@ def main():
 
     _VARS['gridCells'] = BOARD.boardMAP.shape[0]
 
+    pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
     while True:
         checkEvents()
