@@ -200,6 +200,51 @@ class Board:
                 vehicle.position = pos
                 return False
 
+    def countObstaclesLeftUp(self, vehicleId):
+        v = self.getVehicle(vehicleId)
+        x1 = v.position[0]
+        y1 = v.position[1]
+        count = 0
+        counted = []
+        if(v.orientation == "h"):
+            for i in range(0, x1):
+                if(self.boardMAP[i][y1] != 0 and counted.count(self.boardMAP[i][y1]) == 0):
+                    counted.append(self.boardMAP[i][y1])
+                    count += 1
+        else:
+            for i in range(0, y1):
+                if(self.boardMAP[x1][i] != 0 and counted.count(self.boardMAP[x1][i]) == 0):
+                    counted.append(self.boardMAP[x1][i])
+                    count += 1
+        return (count, counted)
+
+    def countObstaclesRightDown(self, vehicleId):
+        v = self.getVehicle(vehicleId)
+        x1 = v.position[0]
+        y1 = v.position[1]
+        count = 0
+        counted = []
+        if(v.orientation == "h"):
+            for i in range(x1+v.size, self.boardMAP.shape[0]):
+                if(self.boardMAP[i][y1] != 0 and counted.count(self.boardMAP[i][y1]) == 0):
+                    counted.append(self.boardMAP[i][y1])
+                    count += 1
+        else:
+            for i in range(y1+v.size, self.boardMAP.shape[1]):
+                if(self.boardMAP[x1][i] != 0 and counted.count(self.boardMAP[x1][i]) == 0):
+                    counted.append(self.boardMAP[x1][i])
+                    count += 1
+        return (count, counted)
+
+    def calculateCurrentStateCost(self):
+        res = self.countObstaclesRightDown(1)
+        cost = res[0]
+        for v in res[1]:
+            res1 = self.countObstaclesLeftUp(v)
+            res2 = self.countObstaclesRightDown(v)
+            cost += res1[0] if res1[0] <= res2[0] and res1[0] != 0 else res2[0]
+        return cost
+
 
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
@@ -223,6 +268,7 @@ def main():
 
     pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
+
     while True:
         checkEvents()
         _VARS['surf'].fill(GREY)
@@ -355,6 +401,8 @@ def checkEvents():
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
+            print("Cost of main piece", BOARD.calculateCurrentStateCost())
+            print("")
 
 
 if __name__ == '__main__':
