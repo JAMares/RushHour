@@ -88,13 +88,16 @@ class Board:
     def generatePuzzle(self):
         # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
         self.colors = random.sample(COLOR_SELECTION, 15)
+        # CLEARS VARIABLE AND WIN STATE
         self.resetBoard()
         f = open(self.filePath, "r")
         list = f.read().split("\n")
+        # CHECKS FOR AVAILABLE LEVELS
         if(len(list) > self.level):
             list = list[self.level].split(" ")
         else:
             return SystemExit(str("All levels complete"))
+        # PREPARES FOR NEXT LEVEL
         self.level += 1
         for v in list:
             id = len(self.vehicles) + 1
@@ -289,6 +292,7 @@ def main():
         # CHECKS FOR WIN STATE
         if(gameBoard.hasWon() == True):
             print("GAME WON, NEXT LEVEL")
+            # GOES TO NEXT LEVEL
             gameBoard.generatePuzzle()
 
 
@@ -410,6 +414,8 @@ def checkEvents(BOARD):
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
+        elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
+            CURR_VEHICLE = event.key - 87
 
 
 if __name__ == '__main__':
