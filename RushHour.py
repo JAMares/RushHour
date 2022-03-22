@@ -1,4 +1,3 @@
-
 from asyncio.windows_events import NULL
 from pickle import REDUCE
 import random
@@ -24,6 +23,8 @@ COLOR_SELECTION = [(0, 0, 204), (0, 204, 204), (204, 204, 0),
 
 
 GAMEBOARD = NULL
+
+
 class Vehicle:
     def __init__(self, id, col, pos, size, orientation):
         self.identification = id
@@ -42,16 +43,16 @@ class Board:
         self.goalPos = goal
         self.vehicles = []
         self.colors = []
-        self.mainPos = (0, 0)
         self.level = 0
         self.filePath = puzzleFile
 
     def hasWon(self):
         # CHECKS IF FRONT OF MAIN VEHICLE COLLIDES WITH GOAL POSITION
-        if(self.mainPos[0]+1 == self.goalPos[0]):
-            return True
-        else:
-            return False
+        v = self.getVehicle(1)
+        if(v != -1):
+            if(v.position[0]+1 == self.goalPos[0]):
+                return True
+        return False
 
     def checkCollision(self, vehicle):
         x = vehicle.position[0]
@@ -84,8 +85,6 @@ class Board:
         # CLEARS BOARD
         self.boardMAP = np.zeros(
             (self.boardMAP.shape[0], self.boardMAP.shape[1]), dtype=int)
-        # RESET MAIN POS
-        self.mainPos = (0, 0)
 
     def generatePuzzle(self):
         # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
@@ -98,7 +97,8 @@ class Board:
         if(len(list) > self.level):
             list = list[self.level].split(" ")
         else:
-            return SystemExit(str("All levels complete"))
+            # WHEN LEVELS RUN OUT, SHOULD ALSO BE POP UP OR LEVELS REMOVED AS A FEATURE
+            raise SystemExit(str("All levels complete"))
         # PREPARES FOR NEXT LEVEL
         self.level += 1
         for v in list:
@@ -107,7 +107,6 @@ class Board:
                 v[0]), int(v[1])), int(v[2]), v[3])
             if(id == 1):  # FIRST VEHICLE IS ALWAYS THE MAIN ONE
                 vehicle.color = RED  # FIRST VEHICLE ALWAYS RED
-                self.mainPos = vehicle.position
             else:
                 # MATCHES EACH VEHICLE ID WITH A COLOR FROM THE LIST
                 vehicle.color = self.colors[id]
@@ -147,9 +146,6 @@ class Board:
             for i in range(0, size):
                 # FOR LOOP ACCOUNTS FOR SIZE OF VEHICLE
                 self.boardMAP[x][y+i] = vehicle.identification
-        # CHECKS IF THIS IS THE MAIN VEHICLE AND UPDATES THE STORED POSITION
-        if(vehicle.isMain == True):
-            self.mainPos = vehicle.position
 
     def getVehicle(self, vehicleId):
         for vehicle in self.vehicles:
@@ -190,7 +186,8 @@ class Board:
         # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
         if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
             # SETS UP WIN STATE
-            self.mainPos = (self.mainPos[0]+1, self.mainPos[1])
+            vehicle.position = (
+                vehicle.position[0]+1, vehicle.position[1])
             return True
         # COPIES OLD POSITION
         pos = (vehicle.position[0], vehicle.position[1])
@@ -261,6 +258,25 @@ class Board:
             cost += res1[0] if res1[0] <= res2[0] and res1[0] != 0 else res2[0]
         return cost
 
+    # THIS FUNCTION CAN BE MODIFIED TO EXCLUDE THE PREVIOUS STATE FROM THE RESULTS
+    def expandPossibleStates(self):
+        states = []
+        # FOR EACH VEHICLE CHECK IF A MOVEMENT IS POSSIBLE
+        for v in self.vehicles:
+            test = self.moveVehicleLeftUp(v.identification, 1)
+            if(test == True):
+                states.append(self.boardMAP.copy())
+                self.moveVehicleRightDown(v.identification, 1)
+            test = self.moveVehicleRightDown(v.identification, 1)
+            if(test == True):
+                states.append(self.boardMAP.copy())
+                self.moveVehicleLeftUp(v.identification, 1)
+        # PRINT EACH POSSIBLE STATE FOR TESTING
+        for arr in states:
+            print("-------------------")
+            print(arr.transpose())
+        return states
+
 
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
@@ -296,7 +312,6 @@ def createBoard(drawing):
             print("GAME WON, NEXT LEVEL")
             # GOES TO NEXT LEVEL
             GAMEBOARD.generatePuzzle()
-
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -417,10 +432,12 @@ def checkEvents(BOARD):
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
-        # VEHICLES WITH ID BETWEEN 10 AND 15 WITH KEYS A->F
+        # VEHICLES WITH ID BETWEEN 10 AND 16 WITH KEYS A->F
         elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
             CURR_VEHICLE = event.key - 87
+        elif event.type == KEYDOWN and event.key == 103:
+            BOARD.expandPossibleStates()
 
 
 # if __name__ == '__main__':
-#     createBoard()
+#    main()
