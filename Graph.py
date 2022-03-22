@@ -2,22 +2,29 @@ from asyncio.windows_events import NULL
 from syslog import closelog
 
 
-class Nodo:
-    father= NULL
-    movimientos= 0
-    bloqueos= 0
-    estado= []
 
-    def __init__(self, father, movimientos, bloqueos, estado):
+class Node:
+    father= NULL
+    movements= 0
+    blocked= 0
+    state= []
+
+    def __init__(self) -> None:
+        pass
+
+    def __init__(self, father, movements, blocked, estado):
         self.father = father
-        self.movimientos = movimientos
-        self.bloqueos = bloqueos
-        self.estado = estado
+        self.movements = movements
+        self.blocked = blocked
+        self.state = estado
 
     def get_Fn(self):
-        return self.bloqueos + self.movimientos
+        return self.blocked + self.movements
 
 class Graph:
+
+    def __init__(self) -> None:
+        pass
 
     def __init__(self, inicio):
         self.inicio = inicio
