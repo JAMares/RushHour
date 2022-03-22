@@ -155,6 +155,8 @@ class Board:
 
     def moveVehicleLeftUp(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
+        if(vehicle == -1):
+            return
         # COPIES OLD POSITION
         pos = (vehicle.position[0], vehicle.position[1])
         # CHECKS ORIENTATION OF VEHICLE
@@ -183,6 +185,8 @@ class Board:
 
     def moveVehicleRightDown(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
+        if(vehicle == -1):
+            return
         # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
         if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
             # SETS UP WIN STATE

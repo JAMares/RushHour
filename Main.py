@@ -8,6 +8,7 @@ from RushHour import *
 _VARS = {'surf': False, 'gridWH': 400,
          'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
 
+
 def algorithm_AStar(start_node):
 
     end_node = NULL
@@ -28,7 +29,6 @@ def main():
     drawing = True
 
     createBoard(drawing)
-
 
 
 if __name__ == '__main__':
