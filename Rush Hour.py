@@ -411,9 +411,10 @@ def checkEvents(BOARD):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
-        # SELECT VEHICLE WITH ID BETWEEN 1 AND 9
+        # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
+        # VEHICLES WITH ID BETWEEN 10 AND 15 WITH KEYS A->F
         elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
             CURR_VEHICLE = event.key - 87
 
