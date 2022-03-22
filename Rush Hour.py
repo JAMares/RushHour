@@ -35,12 +35,14 @@ class Vehicle:
 
 
 class Board:
-    def __init__(self, gridSize, goal):
+    def __init__(self, gridSize, goal, puzzleFile):
         self.boardMAP = np.zeros((gridSize, gridSize), dtype=int)
         self.goalPos = goal
         self.vehicles = []
         self.colors = []
         self.mainPos = (0, 0)
+        self.level = 0
+        self.filePath = puzzleFile
 
     def hasWon(self):
         # CHECKS IF FRONT OF MAIN VEHICLE COLLIDES WITH GOAL POSITION
@@ -74,17 +76,26 @@ class Board:
                     return True
         return False
 
-    def generatePuzzle(self, filePath):
-        # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
-        self.colors = random.sample(COLOR_SELECTION, 15)
+    def resetBoard(self):
         # CLEARS VEHICLES
         self.vehicles.clear()
         # CLEARS BOARD
         self.boardMAP = np.zeros(
             (self.boardMAP.shape[0], self.boardMAP.shape[1]), dtype=int)
+        # RESET MAIN POS
+        self.mainPos = (0, 0)
 
-        f = open(filePath, "r")
-        list = f.read().split(" ")
+    def generatePuzzle(self):
+        # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
+        self.colors = random.sample(COLOR_SELECTION, 15)
+        self.resetBoard()
+        f = open(self.filePath, "r")
+        list = f.read().split("\n")
+        if(len(list) > self.level):
+            list = list[self.level].split(" ")
+        else:
+            return SystemExit(str("All levels complete"))
+        self.level += 1
         for v in list:
             id = len(self.vehicles) + 1
             vehicle = Vehicle(id, 0, (int(
@@ -252,7 +263,6 @@ _VARS = {'surf': False, 'gridWH': 400,
 # CURRENT SELECTED VEHICLE
 global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
-BOARD = Board(6, (6, 2))
 
 
 def main():
@@ -260,31 +270,30 @@ def main():
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     pygame.init()
+    # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
+    gameBoard = Board(6, (6, 2), "./problems.txt")
+    gameBoard.generatePuzzle()
 
-    # THIS SHOULD BE CHANGED TO A SELECTION WITHIN THE WINDOW
-    BOARD.generatePuzzle("./problems.txt")
-
-    _VARS['gridCells'] = BOARD.boardMAP.shape[0]
+    _VARS['gridCells'] = gameBoard.boardMAP.shape[0]
 
     pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
 
     while True:
-        checkEvents()
+        checkEvents(gameBoard)
         _VARS['surf'].fill(GREY)
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
-        placeCells()
+        placeCells(gameBoard)
         pygame.display.update()
         # CHECKS FOR WIN STATE
-        if(BOARD.hasWon() == True):
-            print("GAME WON")
-            # SHOULD CHANGE TO A POP-UP MESSAGE AND CLEARING OF THE BOARD
-            return
+        if(gameBoard.hasWon() == True):
+            print("GAME WON, NEXT LEVEL")
+            gameBoard.generatePuzzle()
 
 
 # NEW METHOD FOR ADDING CELLS :
-def placeCells():
+def placeCells(BOARD):
     # GET CELL DIMENSIONS...
     cellBorder = 6
     celldimX = celldimY = (_VARS['gridWH']/_VARS['gridCells']) - (cellBorder*2)
@@ -378,7 +387,7 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
 
-def checkEvents():
+def checkEvents(BOARD):
     global CURR_VEHICLE
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -401,8 +410,6 @@ def checkEvents():
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
-            print("Cost of main piece", BOARD.calculateCurrentStateCost())
-            print("")
 
 
 if __name__ == '__main__':
