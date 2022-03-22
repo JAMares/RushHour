@@ -1,4 +1,5 @@
 
+from asyncio.windows_events import NULL
 from pickle import REDUCE
 import random
 import string
@@ -22,6 +23,7 @@ COLOR_SELECTION = [(0, 0, 204), (0, 204, 204), (204, 204, 0),
                    (0, 51, 0), (153, 255, 204), (255, 204, 153)]
 
 
+GAMEBOARD = NULL
 class Vehicle:
     def __init__(self, id, col, pos, size, orientation):
         self.identification = id
@@ -268,32 +270,33 @@ global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 
 
-def main():
+def createBoard(drawing):
     global CURR_VEHICLE
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     pygame.init()
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    gameBoard = Board(6, (6, 2), "./problems.txt")
-    gameBoard.generatePuzzle()
+    GAMEBOARD = Board(6, (6, 2), "./problems.txt")
+    GAMEBOARD.generatePuzzle()
 
-    _VARS['gridCells'] = gameBoard.boardMAP.shape[0]
+    _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
 
     pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
 
-    while True:
-        checkEvents(gameBoard)
+    while drawing:
+        checkEvents(GAMEBOARD)
         _VARS['surf'].fill(GREY)
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
-        placeCells(gameBoard)
+        placeCells(GAMEBOARD)
         pygame.display.update()
         # CHECKS FOR WIN STATE
-        if(gameBoard.hasWon() == True):
+        if(GAMEBOARD.hasWon() == True):
             print("GAME WON, NEXT LEVEL")
             # GOES TO NEXT LEVEL
-            gameBoard.generatePuzzle()
+            GAMEBOARD.generatePuzzle()
+
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -419,5 +422,5 @@ def checkEvents(BOARD):
             CURR_VEHICLE = event.key - 87
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     createBoard()

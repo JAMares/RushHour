@@ -1,7 +1,12 @@
 from asyncio.windows_events import NULL
-import Graph
-import RushHour
+from time import time
+from Graph import *
+from RushHour import *
 
+
+# SCREEN DATA
+_VARS = {'surf': False, 'gridWH': 400,
+         'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
 
 def algorithm_AStar(start_node):
 
@@ -12,18 +17,19 @@ def algorithm_AStar(start_node):
 
 def main():
 
-    
+    init_node = Node(NULL, 0, 0, [])
 
-
-    init_node = Graph.Node()
-
-    graph = Graph.Graph(init_node)
-
-
+    graph = Graph(init_node)
 
     open_nodes = []
 
     close_nodes = []
 
+    drawing = True
 
-    return 0
+    createBoard(drawing)
+
+
+
+if __name__ == '__main__':
+    main()

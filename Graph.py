@@ -1,5 +1,4 @@
 from asyncio.windows_events import NULL
-from syslog import closelog
 
 
 
@@ -9,8 +8,9 @@ class Node:
     blocked= 0
     state= []
 
-    def __init__(self) -> None:
+    def __init__(self):
         pass
+        
 
     def __init__(self, father, movements, blocked, estado):
         self.father = father
