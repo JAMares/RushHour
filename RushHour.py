@@ -25,23 +25,46 @@ global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 
 
-def main():
+def createNodes(node: Node, board: Board, openNodes):
+    board.boardMAP = node.state
+    movementCount = node.movements+1
+    hCost = board.calculateCurrentStateCost()
+    possibleStates = board.expandPossibleStates()
 
+    # THIS NEEDS TO CHECK IF EACH NODE STATE DOESN'T EXIST
+    for state in possibleStates:
+        newNode = Node(node, movementCount, hCost, state)
+        openNodes.append(newNode)
+
+    # SORTS NODES BASED ON COST
+    openNodes = sorted(openNodes, key=lambda node: node.get_Fn())
+    return
+
+
+def main():
+    global CURR_VEHICLE
+    # NO SELECTED VEHICLE
+    CURR_VEHICLE = -1
+    # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
+    GAMEBOARD = Board(6, (6, 2), "./problems.txt")
+    GAMEBOARD.generatePuzzle()
     open_nodes = []
 
     close_nodes = []
 
-    father_node = Node(NULL, 0, 0, [])
+    father_node = Node(NULL, 0, 0, GAMEBOARD.boardMAP)
+
+    createNodes(father_node, GAMEBOARD, open_nodes)
+
+    # FOR TESTING NODE COST VALUES
+    for node in open_nodes:
+        print(node.get_Fn())
+
+    return
 
     graph = Graph(father_node)
 
-    global CURR_VEHICLE
-    # NO SELECTED VEHICLE
-    CURR_VEHICLE = -1
     pygame.init()
-    # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, (6, 2), "./problems.txt")
-    GAMEBOARD.generatePuzzle()
 
     _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
 
