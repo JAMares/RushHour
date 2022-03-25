@@ -26,19 +26,19 @@ global CURR_VEHICLE
 
 
 def createNodes(node: Node, board: Board, openNodes):
-    board.boardMAP = node.state
     movementCount = node.movements+1
-    hCost = board.calculateCurrentStateCost()
     possibleStates = board.expandPossibleStates()
 
-    # THIS NEEDS TO CHECK IF EACH NODE STATE DOESN'T EXIST
+    # THIS NEEDS TO CHECK IF EACH NODE STATE DOESN'T EXIST ALREADY
     for state in possibleStates:
+        board.boardMAP = state
+        hCost = board.calculateCurrentStateCost()
         newNode = Node(node, movementCount, hCost, state)
         openNodes.append(newNode)
 
     # SORTS NODES BASED ON COST
     openNodes = sorted(openNodes, key=lambda node: node.get_Fn())
-    return
+    return openNodes
 
 
 def main():
@@ -54,10 +54,12 @@ def main():
 
     father_node = Node(NULL, 0, 0, GAMEBOARD.boardMAP)
 
-    createNodes(father_node, GAMEBOARD, open_nodes)
+    open_nodes = createNodes(father_node, GAMEBOARD, open_nodes)
 
     # FOR TESTING NODE COST VALUES
     for node in open_nodes:
+        print("_----------------------------------_")
+        print(node.state)
         print(node.get_Fn())
 
     return
