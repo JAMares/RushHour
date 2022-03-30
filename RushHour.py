@@ -233,14 +233,12 @@ def checkEvents(BOARD, open_nodes):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
-                print(BOARD.calculateCurrentStateCost())
         # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
         elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
             if(CURR_VEHICLE == -1):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
-                print(BOARD.calculateCurrentStateCost())
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
