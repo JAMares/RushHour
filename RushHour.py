@@ -48,10 +48,12 @@ def main():
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
     GAMEBOARD = Board(6, (6, 2), "./problems.txt")
     GAMEBOARD.generatePuzzle()
-    open_nodes = []
 
+    #Opened and closed nodes A*
+    open_nodes = []
     close_nodes = []
 
+    #father peer node A*
     father_node = Node(NULL, 0, 0, GAMEBOARD.boardMAP)
 
     open_nodes = createNodes(father_node, GAMEBOARD, open_nodes)
@@ -62,8 +64,6 @@ def main():
         print(node.state)
         print(node.get_Fn())
 
-    return
-
     graph = Graph(father_node)
 
     pygame.init()
@@ -72,7 +72,7 @@ def main():
 
     pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
-
+    
     while True:
         checkEvents(GAMEBOARD)
         _VARS['surf'].fill(GREY)
@@ -80,11 +80,14 @@ def main():
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
+        
         # CHECKS FOR WIN STATE
         if(GAMEBOARD.hasWon() == True):
             print("GAME WON, NEXT LEVEL")
             # GOES TO NEXT LEVEL
             GAMEBOARD.generatePuzzle()
+
+    return
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -128,14 +131,11 @@ def placeCells(BOARD):
 
 
 # Draw filled rectangle at coordinates
-
-
 def drawSquareCell(x, y, dimX, dimY, color):
     pygame.draw.rect(
         _VARS['surf'], color,
         (x, y, dimX, dimY)
     )
-
 
 def drawSquareGrid(origin, gridWH, cells):
 
@@ -186,6 +186,7 @@ def checkEvents(BOARD):
     global CURR_VEHICLE
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            pygame.quit()
             sys.exit()
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()
