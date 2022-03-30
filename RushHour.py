@@ -6,6 +6,7 @@ import pygame
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
 from Graph import *
+from Button import *
 
 # CONSTANTS:
 SCREENSIZE = WIDTH, HEIGHT = 800, 600
@@ -84,6 +85,8 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
 
 def main():
     global CURR_VEHICLE
+    global buttonStart
+    
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
@@ -94,11 +97,11 @@ def main():
 
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
-    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    #test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
     GAMEBOARD.generatePuzzle()
-    for i in test:
+    '''for i in test:
         print("----------------")
-        print(i.state.transpose())
+        print(i.state.transpose())'''
 
     graph = Graph(father_node)
 
@@ -110,8 +113,10 @@ def main():
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
 
     while True:
+        buttonStart = Button('Start',100,30)
         checkEvents(GAMEBOARD, open_nodes)
         _VARS['surf'].fill(GREY)
+        drawButton(buttonStart)
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
@@ -166,6 +171,34 @@ def placeCells(BOARD):
 
 # Draw filled rectangle at coordinates
 
+def drawButton(buttonStart):
+    # elevation logic 
+    buttonStart.top_rect.y = buttonStart.y - buttonStart.movement
+    buttonStart.text_rect.center = buttonStart.top_rect.center 
+
+    buttonStart.bottom_rect.midtop = buttonStart.top_rect.midtop
+    buttonStart.bottom_rect.height = buttonStart.top_rect.height + buttonStart.movement
+
+    pygame.draw.rect(_VARS['surf'],buttonStart.bottom_color, buttonStart.bottom_rect,border_radius = 12)
+    pygame.draw.rect(_VARS['surf'],buttonStart.top_color, buttonStart.top_rect,border_radius = 12)
+    _VARS['surf'].blit(buttonStart.text, buttonStart.text_rect)
+
+def check_click(buttonStart):
+    mouse_pos = pygame.mouse.get_pos()
+    if buttonStart.top_rect.collidepoint(mouse_pos):
+        buttonStart.top_color = (0, 86, 31)
+        if pygame.mouse.get_pressed()[0]:
+            buttonStart.movement = 0
+            print("Entra")
+            buttonStart.pressed = True
+        else:
+            buttonStart.movement = buttonStart.elevation
+            if buttonStart.pressed == True:
+                buttonStart.pressed = False
+    else:
+        buttonStart.movement = buttonStart.elevation
+        buttonStart.top_color = (0, 140, 51)
+
 
 def drawSquareCell(x, y, dimX, dimY, color):
     pygame.draw.rect(
@@ -218,11 +251,13 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x, cont_y + (cellSize*x)),
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
-
+#Verifica que los eventos le den click
 def checkEvents(BOARD, open_nodes):
     global CURR_VEHICLE
+    check_click(buttonStart)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            pygame.quit()
             sys.exit()
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()
