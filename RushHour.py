@@ -25,21 +25,45 @@ global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 
 
-def createNodes(node: Node, board: Board, openNodes):
+def createNodes(node: Node, board: Board, openNodes, closeNodes):
     movementCount = node.movements+1
     possibleStates = board.expandPossibleStates()
 
-    # THIS NEEDS TO CHECK IF EACH NODE STATE DOESN'T EXIST ALREADY
+    # THIS ALREADY CHECKS IF EACH NODE STATE DOESN'T EXIST ALREADY
     for state in possibleStates:
         board.boardMAP = state
         hCost = board.calculateCurrentStateCost()
         newNode = Node(node, movementCount, hCost, state)
-        openNodes.append(newNode)
+        
+        if checkIfCloseNode(newNode, closeNodes):
+            continue
+            
+        setOpenNodes(newNode, openNodes)
 
     # SORTS NODES BASED ON COST
     openNodes = sorted(openNodes, key=lambda node: node.get_Fn())
     return openNodes
 
+# Function to insert open nodes avoiding repetitions
+def setOpenNodes(newNode, openNodes):
+    state = newNode.state
+
+    for openNode in openNodes:
+        if (state == openNode.state).all():
+            return #Ignore the reapeated node
+    
+    # Depending on the intent, this could be changed to an ordered insert
+    openNodes.append(newNode)
+
+# Function to check if a node was already considerate before
+def checkIfCloseNode(newNode, closeNodes):
+    state = newNode.state
+
+    for closedNode in closeNodes:
+        if (state == closedNode.state).all():
+            return true
+
+    return false
 
 def main():
     global CURR_VEHICLE
