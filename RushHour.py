@@ -1,6 +1,7 @@
 from asyncio.windows_events import NULL
 from pickle import REDUCE
 import sys
+import copy
 import pygame
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
@@ -15,8 +16,6 @@ GREEN = (0, 255, 0)
 GREY = (160, 160, 160)
 
 
-GAMEBOARD = NULL
-
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
          'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
@@ -25,20 +24,21 @@ global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 
 
-def createNodes(node: Node, board: Board, openNodes, closeNodes):
+def createNodes(node: Node, board, openNodes, closeNodes):
     movementCount = node.movements+1
+    board.boardMAP = node.state.copy()
+    board.vehicles = copy.deepcopy(node.vehicles)
     possibleStates = board.expandPossibleStates()
-
     # THIS ALREADY CHECKS IF EACH NODE STATE DOESN'T EXIST ALREADY
-    for state in possibleStates:
-        board.boardMAP = state
+    for index in range(0, len(possibleStates[0])):
+        board.boardMAP = possibleStates[0][index].copy()
+        board.vehicles = copy.deepcopy(possibleStates[1][index])
         hCost = board.calculateCurrentStateCost()
-        newNode = Node(node, movementCount, hCost, state)
-
-        if checkIfCloseNode(newNode, closeNodes):
-            continue
-
-        openNodes = setOpenNodes(newNode, openNodes)
+        newNode = Node(node, movementCount, hCost,
+                       board.boardMAP.copy(), copy.deepcopy(board.vehicles))
+        if checkIfCloseNode(newNode, closeNodes) == False:
+            if setOpenNodes(newNode, openNodes) == False:
+                openNodes.append(newNode)
 
     # SORTS NODES BASED ON COST
     openNodes = sorted(openNodes, key=lambda node: node.get_Fn())
@@ -48,38 +48,32 @@ def createNodes(node: Node, board: Board, openNodes, closeNodes):
 
 
 def setOpenNodes(newNode, openNodes):
-    state = newNode.state
-
     for openNode in openNodes:
-        if (state == openNode.state).all():
-            return openNodes  # Ignore the reapeated node
+        if (np.array_equal(newNode.state, openNode.state, True)):
+            return True  # Ignore the reapeated node
 
     # Depending on the intent, this could be changed to an ordered insert
-    openNodes.append(newNode)
-    return openNodes
+    return False
 
 # Function to check if a node was already considerate before
 
 
 def checkIfCloseNode(newNode, closeNodes):
-    state = newNode.state
-
     for closedNode in closeNodes:
-        if (state == closedNode.state).all():
+        if (np.array_equal(newNode.state, closedNode.state, True)):
             return True
-
     return False
 
 
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     currentNode = root
-    
+    open_nodes.append(currentNode)
     while (currentNode.blocked > 0):
-        currentNode = open_nodes.pop(0)
-        print(len(close_nodes))
-        close_nodes.append(currentNode)
+        currentNode = open_nodes[0]
         open_nodes = createNodes(
             currentNode, GAMEBOARD, open_nodes, close_nodes)
+        open_nodes.remove(currentNode)
+        close_nodes.append(currentNode)
     solution = []
     while(currentNode != root):
         solution.append(currentNode)
@@ -99,10 +93,12 @@ def main():
     close_nodes = []
 
     father_node = Node(
-        NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP)
-    close_nodes.append(father_node)
-    open_nodes = createNodes(father_node, GAMEBOARD, open_nodes, close_nodes)
-    print(a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD))
+        NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
+    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    GAMEBOARD.generatePuzzle()
+    for i in test:
+        print("----------------")
+        print(i.state.transpose())
 
     graph = Graph(father_node)
 
@@ -237,24 +233,14 @@ def checkEvents(BOARD, open_nodes):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
-                # FOR TESTING NODE COST VALUES
-                print("------------------------------------")
-                for node in open_nodes:
-                    print("_----------------------------------_")
-                    print(node.state)
-                    print(node.get_Fn())
+                print(BOARD.calculateCurrentStateCost())
         # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
         elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
             if(CURR_VEHICLE == -1):
                 print("no vehicle")
             else:
                 BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
-                # FOR TESTING NODE COST VALUES
-                print("------------------------------------")
-                for node in open_nodes:
-                    print("_----------------------------------_")
-                    print(node.state)
-                    print(node.get_Fn())
+                print(BOARD.calculateCurrentStateCost())
         # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
         elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
             CURR_VEHICLE = event.key - 48
