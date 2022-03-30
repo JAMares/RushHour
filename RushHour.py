@@ -1,6 +1,7 @@
 from asyncio.windows_events import NULL
 from pickle import REDUCE
 import sys
+import copy
 import pygame
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
@@ -15,8 +16,6 @@ GREEN = (0, 255, 0)
 GREY = (160, 160, 160)
 
 
-GAMEBOARD = NULL
-
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
          'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
@@ -25,20 +24,62 @@ global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
 
 
-def createNodes(node: Node, board: Board, openNodes):
+def createNodes(node: Node, board, openNodes, closeNodes):
     movementCount = node.movements+1
+    board.boardMAP = node.state.copy()
+    board.vehicles = copy.deepcopy(node.vehicles)
     possibleStates = board.expandPossibleStates()
-
-    # THIS NEEDS TO CHECK IF EACH NODE STATE DOESN'T EXIST ALREADY
-    for state in possibleStates:
-        board.boardMAP = state
+    # THIS ALREADY CHECKS IF EACH NODE STATE DOESN'T EXIST ALREADY
+    for index in range(0, len(possibleStates[0])):
+        board.boardMAP = possibleStates[0][index].copy()
+        board.vehicles = copy.deepcopy(possibleStates[1][index])
         hCost = board.calculateCurrentStateCost()
-        newNode = Node(node, movementCount, hCost, state)
-        openNodes.append(newNode)
+        newNode = Node(node, movementCount, hCost,
+                       board.boardMAP.copy(), copy.deepcopy(board.vehicles))
+        if checkIfCloseNode(newNode, closeNodes) == False:
+            if setOpenNodes(newNode, openNodes) == False:
+                openNodes.append(newNode)
 
     # SORTS NODES BASED ON COST
     openNodes = sorted(openNodes, key=lambda node: node.get_Fn())
     return openNodes
+
+# Function to insert open nodes avoiding repetitions
+
+
+def setOpenNodes(newNode, openNodes):
+    for openNode in openNodes:
+        if (np.array_equal(newNode.state, openNode.state, True)):
+            return True  # Ignore the reapeated node
+
+    # Depending on the intent, this could be changed to an ordered insert
+    return False
+
+# Function to check if a node was already considerate before
+
+
+def checkIfCloseNode(newNode, closeNodes):
+    for closedNode in closeNodes:
+        if (np.array_equal(newNode.state, closedNode.state, True)):
+            return True
+    return False
+
+
+def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
+    currentNode = root
+    open_nodes.append(currentNode)
+    while (currentNode.blocked > 0):
+        currentNode = open_nodes[0]
+        open_nodes = createNodes(
+            currentNode, GAMEBOARD, open_nodes, close_nodes)
+        open_nodes.remove(currentNode)
+        close_nodes.append(currentNode)
+    solution = []
+    while(currentNode != root):
+        solution.append(currentNode)
+        currentNode = currentNode.father
+    solution.reverse()
+    return solution
 
 
 def main():
@@ -48,21 +89,16 @@ def main():
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
     GAMEBOARD = Board(6, (6, 2), "./problems.txt")
     GAMEBOARD.generatePuzzle()
-
-    #Opened and closed nodes A*
     open_nodes = []
     close_nodes = []
 
-    #father peer node A*
-    father_node = Node(NULL, 0, 0, GAMEBOARD.boardMAP)
-
-    open_nodes = createNodes(father_node, GAMEBOARD, open_nodes)
-
-    # FOR TESTING NODE COST VALUES
-    for node in open_nodes:
-        print("_----------------------------------_")
-        print(node.state)
-        print(node.get_Fn())
+    father_node = Node(
+        NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
+    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    GAMEBOARD.generatePuzzle()
+    for i in test:
+        print("----------------")
+        print(i.state.transpose())
 
     graph = Graph(father_node)
 
@@ -72,22 +108,20 @@ def main():
 
     pygame.display.set_caption('Rush Hour')
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
-    
+
     while True:
-        checkEvents(GAMEBOARD)
+        checkEvents(GAMEBOARD, open_nodes)
         _VARS['surf'].fill(GREY)
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
-        
         # CHECKS FOR WIN STATE
         if(GAMEBOARD.hasWon() == True):
             print("GAME WON, NEXT LEVEL")
+            return
             # GOES TO NEXT LEVEL
-            GAMEBOARD.generatePuzzle()
-
-    return
+            # GAMEBOARD.generatePuzzle()
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -131,11 +165,14 @@ def placeCells(BOARD):
 
 
 # Draw filled rectangle at coordinates
+
+
 def drawSquareCell(x, y, dimX, dimY, color):
     pygame.draw.rect(
         _VARS['surf'], color,
         (x, y, dimX, dimY)
     )
+
 
 def drawSquareGrid(origin, gridWH, cells):
 
@@ -182,11 +219,10 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
 
-def checkEvents(BOARD):
+def checkEvents(BOARD, open_nodes):
     global CURR_VEHICLE
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
             sys.exit()
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()

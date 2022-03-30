@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import random
 from Vehicle import *
 
@@ -75,7 +76,7 @@ class Board:
             # WHEN LEVELS RUN OUT, SHOULD ALSO BE POP UP OR LEVELS REMOVED AS A FEATURE
             raise SystemExit(str("All levels complete"))
         # PREPARES FOR NEXT LEVEL
-        self.level += 1
+        #self.level += 1
         for v in list:
             id = len(self.vehicles) + 1
             vehicle = Vehicle(id, 0, (int(
@@ -240,14 +241,17 @@ class Board:
     # THIS FUNCTION CAN BE MODIFIED TO EXCLUDE THE PREVIOUS STATE FROM THE RESULTS
     def expandPossibleStates(self):
         states = []
+        vehiculos = []
         # FOR EACH VEHICLE CHECK IF A MOVEMENT IS POSSIBLE
         for v in self.vehicles:
             test = self.moveVehicleLeftUp(v.identification, 1)
             if(test == True):
                 states.append(self.boardMAP.copy())
+                vehiculos.append(copy.deepcopy(self.vehicles))
                 self.moveVehicleRightDown(v.identification, 1)
             test = self.moveVehicleRightDown(v.identification, 1)
             if(test == True):
                 states.append(self.boardMAP.copy())
+                vehiculos.append(copy.deepcopy(self.vehicles))
                 self.moveVehicleLeftUp(v.identification, 1)
-        return states
+        return [states, vehiculos]
