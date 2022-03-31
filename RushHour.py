@@ -28,18 +28,18 @@ global CURR_VEHICLE
 
 def createNodes(node: Node, board, openNodes, closeNodes):
     movementCount = node.movements+1
-    board.boardMAP = node.state.copy()
-    board.vehicles = copy.deepcopy(node.vehicles)
+    board.boardMAP = node.state
+    board.vehicles = node.vehicles
     possibleStates = board.expandPossibleStates()
     # THIS ALREADY CHECKS IF EACH NODE STATE DOESN'T EXIST ALREADY
     for index in range(0, len(possibleStates[0])):
-        board.boardMAP = possibleStates[0][index].copy()
-        board.vehicles = copy.deepcopy(possibleStates[1][index])
+        board.boardMAP = possibleStates[0][index]
+        board.vehicles = possibleStates[1][index]
         hCost = board.calculateCurrentStateCost()
         newNode = Node(node, movementCount, hCost,
-                       board.boardMAP.copy(), copy.deepcopy(board.vehicles))
-        if checkIfCloseNode(newNode, closeNodes) == False:
-            if setOpenNodes(newNode, openNodes) == False:
+                       board.boardMAP, board.vehicles)
+        if checkNodeRepetition(newNode, openNodes) == False:
+            if(checkNodeRepetition(newNode, closeNodes) == False):
                 openNodes.append(newNode)
 
     # SORTS NODES BASED ON COST
@@ -49,35 +49,36 @@ def createNodes(node: Node, board, openNodes, closeNodes):
 # Function to insert open nodes avoiding repetitions
 
 
-def setOpenNodes(newNode, openNodes):
-    for openNode in openNodes:
-        if (np.array_equal(newNode.state, openNode.state, True)):
-            return True  # Ignore the reapeated node
-
+def checkNodeRepetition(newNode, nodeList):
+    maxR = len(newNode.vehicles)
+    for node in nodeList:
+        test = False
+        for index in range(0, maxR):
+            if(node.vehicles[index].position != newNode.vehicles[index].position):
+                break
+            if(index == maxR-1):
+                test = True
+        if(test):
+            return test
     # Depending on the intent, this could be changed to an ordered insert
     return False
 
 # Function to check if a node was already considerate before
 
 
-def checkIfCloseNode(newNode, closeNodes):
-    for closedNode in closeNodes:
-        if (np.array_equal(newNode.state, closedNode.state, True)):
-            return True
-    return False
-
-
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     currentNode = root
     open_nodes.append(currentNode)
+    count = 0
     while (currentNode.blocked > 0):
-        currentNode = open_nodes[0]
+        count += 1
+        print(count)
+        currentNode = open_nodes.pop(0)
         open_nodes = createNodes(
             currentNode, GAMEBOARD, open_nodes, close_nodes)
-        open_nodes.remove(currentNode)
         close_nodes.append(currentNode)
     solution = []
-    while(currentNode != root):
+    while(currentNode != 0):
         solution.append(currentNode)
         currentNode = currentNode.father
     solution.reverse()
@@ -87,7 +88,7 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
 def main():
     global CURR_VEHICLE
     global buttonStart
-    
+
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
@@ -118,7 +119,7 @@ def main():
     _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
 
     while True:
-        buttonStart = Button('Start',100,30)
+        buttonStart = Button('Start', 100, 30)
         checkEvents(GAMEBOARD, test, length_solucion)
         _VARS['surf'].fill(GREY)
         drawButton(buttonStart)
@@ -179,16 +180,19 @@ def placeCells(BOARD):
 # Draw filled rectangle at coordinates
 
 def drawButton(buttonStart):
-    # elevation logic 
+    # elevation logic
     buttonStart.top_rect.y = buttonStart.y - buttonStart.movement
-    buttonStart.text_rect.center = buttonStart.top_rect.center 
+    buttonStart.text_rect.center = buttonStart.top_rect.center
 
     buttonStart.bottom_rect.midtop = buttonStart.top_rect.midtop
     buttonStart.bottom_rect.height = buttonStart.top_rect.height + buttonStart.movement
 
-    pygame.draw.rect(_VARS['surf'],buttonStart.bottom_color, buttonStart.bottom_rect,border_radius = 12)
-    pygame.draw.rect(_VARS['surf'],buttonStart.top_color, buttonStart.top_rect,border_radius = 12)
+    pygame.draw.rect(_VARS['surf'], buttonStart.bottom_color,
+                     buttonStart.bottom_rect, border_radius=12)
+    pygame.draw.rect(_VARS['surf'], buttonStart.top_color,
+                     buttonStart.top_rect, border_radius=12)
     _VARS['surf'].blit(buttonStart.text, buttonStart.text_rect)
+
 
 def check_click(buttonStart):
     mouse_pos = pygame.mouse.get_pos()
@@ -258,7 +262,9 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x, cont_y + (cellSize*x)),
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
-#Verifica que los eventos le den click
+# Verifica que los eventos le den click
+
+
 def checkEvents(BOARD, solution, pos_solution):
     global CURR_VEHICLE
     check_click(buttonStart)
@@ -266,7 +272,7 @@ def checkEvents(BOARD, solution, pos_solution):
         BOARD.boardMAP = solution[pos_solution].state
     else:
         BOARD.moveVehicleMain()
-    time.sleep(1) #Here going to change for clickbutton
+    time.sleep(1)  # Here going to change for clickbutton
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -294,6 +300,7 @@ def checkEvents(BOARD, solution, pos_solution):
         #     CURR_VEHICLE = event.key - 87
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
+
 
 if __name__ == '__main__':
     main()

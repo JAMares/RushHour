@@ -159,7 +159,6 @@ class Board:
                 vehicle.position = pos
                 return False
 
-
     def moveVehicleMain(self):
         vehicle = self.getVehicle(1)
         if(vehicle == -1):
@@ -181,7 +180,6 @@ class Board:
         else:
             vehicle.position = pos
             return False
-            
 
     def moveVehicleRightDown(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
