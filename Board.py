@@ -159,6 +159,64 @@ class Board:
                 vehicle.position = pos
                 return False
 
+
+    def moveVehicleMain(self):
+        vehicle = self.getVehicle(1)
+        if(vehicle == -1):
+            return
+        # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+        if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
+            # SETS UP WIN STATE
+            vehicle.position = (
+                vehicle.position[0]+1, vehicle.position[1])
+            return True
+        # COPIES OLD POSITION
+        pos = (vehicle.position[0], vehicle.position[1])
+        # CHECKS ORIENTATION OF VEHICLE
+        vehicle.position = (pos[0] + 1, pos[1])
+        if(self.checkCollision(vehicle) == False):
+            # UPDATES BOARD IF NO COLLISIONS
+            self.updateVehicle(vehicle)
+            return True
+        else:
+            vehicle.position = pos
+            return False
+            
+
+    def moveVehicleRightDown(self, vehicleId, amount):
+        vehicle = self.getVehicle(vehicleId)
+        if(vehicle == -1):
+            return
+        # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+        if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
+            # SETS UP WIN STATE
+            vehicle.position = (
+                vehicle.position[0]+1, vehicle.position[1])
+            return True
+        # COPIES OLD POSITION
+        pos = (vehicle.position[0], vehicle.position[1])
+        # CHECKS ORIENTATION OF VEHICLE
+        if(vehicle.orientation == "v"):
+            # MOVES VEHICLE DOWN
+            vehicle.position = (pos[0], pos[1] + amount)
+            if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
+                self.updateVehicle(vehicle)
+                return True
+            else:
+                vehicle.position = pos
+                return False
+        else:
+            # MOVES VEHICLE RIGHT
+            vehicle.position = (pos[0] + amount, pos[1])
+            if(self.checkCollision(vehicle) == False):
+                # UPDATES BOARD IF NO COLLISIONS
+                self.updateVehicle(vehicle)
+                return True
+            else:
+                vehicle.position = pos
+                return False
+
     def moveVehicleRightDown(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
         if(vehicle == -1):

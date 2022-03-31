@@ -2,6 +2,7 @@ from asyncio.windows_events import NULL
 from pickle import REDUCE
 import sys
 import copy
+import time
 import pygame
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
@@ -94,11 +95,15 @@ def main():
     GAMEBOARD.generatePuzzle()
     open_nodes = []
     close_nodes = []
+    length_solucion = 0
 
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
-    #test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
-    GAMEBOARD.generatePuzzle()
+    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    # print(test[0])
+    # print("\n")
+    # print(GAMEBOARD.boardMAP)
+    # GAMEBOARD.generatePuzzle()
     '''for i in test:
         print("----------------")
         print(i.state.transpose())'''
@@ -114,7 +119,7 @@ def main():
 
     while True:
         buttonStart = Button('Start',100,30)
-        checkEvents(GAMEBOARD, open_nodes)
+        checkEvents(GAMEBOARD, test, length_solucion)
         _VARS['surf'].fill(GREY)
         drawButton(buttonStart)
         drawSquareGrid(
@@ -122,6 +127,8 @@ def main():
         placeCells(GAMEBOARD)
         pygame.display.update()
         # CHECKS FOR WIN STATE
+        if(length_solucion < len(test)):
+            length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
             print("GAME WON, NEXT LEVEL")
             return
@@ -252,9 +259,14 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
 #Verifica que los eventos le den click
-def checkEvents(BOARD, open_nodes):
+def checkEvents(BOARD, solution, pos_solution):
     global CURR_VEHICLE
     check_click(buttonStart)
+    if(pos_solution < len(solution)):
+        BOARD.boardMAP = solution[pos_solution].state
+    else:
+        BOARD.moveVehicleMain()
+    time.sleep(1) #Here going to change for clickbutton
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -263,26 +275,25 @@ def checkEvents(BOARD, open_nodes):
             pygame.quit()
             sys.exit()
         # MOVE SELECTED VEHICLE LEFT OR UP DEPENDING ON ORIENTATION
-        elif event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_UP):
-            if(CURR_VEHICLE == -1):
-                print("no vehicle")
-            else:
-                BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
-        # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
-        elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
-            if(CURR_VEHICLE == -1):
-                print("no vehicle")
-            else:
-                BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
-        # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
-        elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
-            CURR_VEHICLE = event.key - 48
-        # VEHICLES WITH ID BETWEEN 10 AND 16 WITH KEYS A->F
-        elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
-            CURR_VEHICLE = event.key - 87
+        # elif event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_UP):
+        #     if(CURR_VEHICLE == -1):
+        #         print("no vehicle")
+        #     else:
+        #         BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
+        # # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
+        # elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
+        #     if(CURR_VEHICLE == -1):
+        #         print("no vehicle")
+        #     else:
+        #         BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
+        # # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
+        # elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
+        #     CURR_VEHICLE = event.key - 48
+        # # VEHICLES WITH ID BETWEEN 10 AND 16 WITH KEYS A->F
+        # elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
+        #     CURR_VEHICLE = event.key - 87
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
-
 
 if __name__ == '__main__':
     main()
