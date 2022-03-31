@@ -118,9 +118,9 @@ def main():
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test)):
             length_solucion += 1
-        # if(GAMEBOARD.hasWon() == True):
-            #print("GAME WON, NEXT LEVEL")
-            # return
+        if(GAMEBOARD.hasWon() == True):
+            print("GAME WON, NEXT LEVEL")
+            return
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
 
