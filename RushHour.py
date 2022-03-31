@@ -69,10 +69,7 @@ def checkNodeRepetition(newNode, nodeList):
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     currentNode = root
     open_nodes.append(currentNode)
-    count = 0
     while (currentNode.blocked > 0):
-        count += 1
-        print(count)
         currentNode = open_nodes.pop(0)
         open_nodes = createNodes(
             currentNode, GAMEBOARD, open_nodes, close_nodes)
@@ -101,15 +98,6 @@ def main():
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
-    # print(test[0])
-    # print("\n")
-    # print(GAMEBOARD.boardMAP)
-    # GAMEBOARD.generatePuzzle()
-    '''for i in test:
-        print("----------------")
-        print(i.state.transpose())'''
-
-    graph = Graph(father_node)
 
     pygame.init()
 
@@ -130,14 +118,15 @@ def main():
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test)):
             length_solucion += 1
-        if(GAMEBOARD.hasWon() == True):
-            print("GAME WON, NEXT LEVEL")
-            return
+        # if(GAMEBOARD.hasWon() == True):
+            #print("GAME WON, NEXT LEVEL")
+            # return
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
 
+            # NEW METHOD FOR ADDING CELLS :
 
-# NEW METHOD FOR ADDING CELLS :
+
 def placeCells(BOARD):
     # GET CELL DIMENSIONS...
     cellBorder = 6
