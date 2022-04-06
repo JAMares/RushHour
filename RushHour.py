@@ -4,6 +4,8 @@ import sys
 import copy
 import time
 import pygame
+from tkinter import *
+from tkinter import messagebox
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
 from Graph import *
@@ -98,7 +100,7 @@ def main():
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
-
+    
     pygame.init()
 
     _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
@@ -119,7 +121,10 @@ def main():
         if(length_solucion < len(test)):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
-            print("GAME WON, NEXT LEVEL")
+            Tk().wm_withdraw() #to hide the main window
+            messagebox.showinfo(title = "WIN",
+                                message = "Congrats! Do yo want to continue to next level?")
+            #Se debe pasar al sig nivel
             return
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
@@ -141,10 +146,10 @@ def placeCells(BOARD):
                     (2*row*cellBorder) + _VARS['lineWidth']/2
                 y = _VARS['gridOrigin'][1] + (celldimX*column) + cellBorder + (
                     2*column*cellBorder) + _VARS['lineWidth']/2
-                drawSquareCell(x, y, celldimX, celldimY, v.color)
+                drawSquareCell(x-5, y-5, celldimX+11, celldimY+11, v.color)
 
                 # DRAWING CORRESPONDING ID FOR EACH VEHICLE CELL
-                font = pygame.font.SysFont('arial', 15)
+                font = pygame.font.SysFont('arial', 20)
                 vId = BOARD.boardMAP[row][column]
                 # IF VEHICLE IS SELECTED, DRAW THE TEXT WHITE
                 if(vId == CURR_VEHICLE):
@@ -159,11 +164,11 @@ def placeCells(BOARD):
         drawSquareCell(
             _VARS['gridOrigin'][0] + (celldimY*BOARD.goalPos[0])
             + cellBorder + (2*BOARD.goalPos[0]
-                            * cellBorder) + _VARS['lineWidth']/2,
+                            * cellBorder) + _VARS['lineWidth']/2 - 5,
             _VARS['gridOrigin'][1] + (celldimX*BOARD.goalPos[1])
             + cellBorder + (2*BOARD.goalPos[1]*cellBorder) +
-            _VARS['lineWidth']/2,
-            celldimX, celldimY, GREEN)
+            _VARS['lineWidth']/2 -5 ,
+            celldimX + 11, celldimY + 11, GREEN)
 
 
 # Draw filled rectangle at coordinates
@@ -201,6 +206,7 @@ def check_click(buttonStart):
 
 
 def drawSquareCell(x, y, dimX, dimY, color):
+    i = 0
     pygame.draw.rect(
         _VARS['surf'], color,
         (x, y, dimX, dimY)
@@ -256,7 +262,6 @@ def drawSquareGrid(origin, gridWH, cells):
 
 def checkEvents(BOARD, solution, pos_solution):
     global CURR_VEHICLE
-    check_click(buttonStart)
     if(pos_solution < len(solution)):
         BOARD.boardMAP = solution[pos_solution].state
     else:
@@ -269,24 +274,6 @@ def checkEvents(BOARD, solution, pos_solution):
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()
             sys.exit()
-        # MOVE SELECTED VEHICLE LEFT OR UP DEPENDING ON ORIENTATION
-        # elif event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_UP):
-        #     if(CURR_VEHICLE == -1):
-        #         print("no vehicle")
-        #     else:
-        #         BOARD.moveVehicleLeftUp(CURR_VEHICLE, 1)
-        # # MOVE SELECTED VEHICLE RIGHT OR DOWN DEPENDING ON ORIENTATION
-        # elif event.type == KEYDOWN and (event.key == K_RIGHT or event.key == K_DOWN):
-        #     if(CURR_VEHICLE == -1):
-        #         print("no vehicle")
-        #     else:
-        #         BOARD.moveVehicleRightDown(CURR_VEHICLE, 1)
-        # # SELECT VEHICLE WITH ID BETWEEN 1 AND 9 WITH KEYS 1->9
-        # elif event.type == KEYDOWN and event.key >= K_1 and event.key <= K_9:
-        #     CURR_VEHICLE = event.key - 48
-        # # VEHICLES WITH ID BETWEEN 10 AND 16 WITH KEYS A->F
-        # elif event.type == KEYDOWN and event.key >= 97 and event.key <= 102:
-        #     CURR_VEHICLE = event.key - 87
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
 
