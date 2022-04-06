@@ -85,11 +85,11 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
 
 
 def main():
-    global CURR_VEHICLE
-    global buttonStart
+    global CURR_VEHICLE, buttonStart, isRunning
 
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
+    isRunning = 0
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
     GAMEBOARD = Board(6, "./problem5.txt")
     GAMEBOARD.generatePuzzle()
@@ -118,8 +118,11 @@ def main():
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
+        if (check_click(buttonStart) == True):
+            isRunning = 1
+        print(length_solucion, len(test), isRunning)
         # CHECKS FOR WIN STATE
-        if(length_solucion < len(test)):
+        if(length_solucion < len(test) and isRunning == 1):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw()  # to hide the main window
@@ -196,8 +199,8 @@ def check_click(buttonStart):
         buttonStart.top_color = (0, 86, 31)
         if pygame.mouse.get_pressed()[0]:
             buttonStart.movement = 0
-            print("Entra")
             buttonStart.pressed = True
+            return True
         else:
             buttonStart.movement = buttonStart.elevation
             if buttonStart.pressed == True:
