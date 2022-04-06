@@ -122,8 +122,9 @@ def main():
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw() #to hide the main window
-            messagebox.showinfo(title = "WIN",
-                                message = "Congrats! Do yo want to continue to next level?")
+            #answer saves what user wants (yes, no)
+            answer = messagebox.askquestion(title = "WIN",
+                                            message = "Congrats! Do yo want to continue to next level?"))
             #Se debe pasar al sig nivel
             return
             # GOES TO NEXT LEVEL
@@ -159,6 +160,7 @@ def placeCells(BOARD):
                     text = font.render(
                         str(vId), True, BLACK)
                 _VARS['surf'].blit(text, (x+cellBorder, y))
+                
     # DRAW WIN TILE
     if(BOARD.hasWon() == False):
         drawSquareCell(
@@ -175,7 +177,7 @@ def placeCells(BOARD):
 
 def drawButton(buttonStart):
     # elevation logic
-    buttonStart.top_rect.y = buttonStart.y - buttonStart.movement
+    buttonStart.top_rect.y = 300
     buttonStart.text_rect.center = buttonStart.top_rect.center
 
     buttonStart.bottom_rect.midtop = buttonStart.top_rect.midtop
