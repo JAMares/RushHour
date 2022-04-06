@@ -91,8 +91,9 @@ def main():
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, (6, 2), "./problems.txt")
+    GAMEBOARD = Board(6, "./problem2.txt")
     GAMEBOARD.generatePuzzle()
+
     open_nodes = []
     close_nodes = []
     length_solucion = 0
@@ -100,7 +101,7 @@ def main():
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
-    
+
     pygame.init()
 
     _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
@@ -121,10 +122,10 @@ def main():
         if(length_solucion < len(test)):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
-            Tk().wm_withdraw() #to hide the main window
-            messagebox.showinfo(title = "WIN",
-                                message = "Congrats! Do yo want to continue to next level?")
-            #Se debe pasar al sig nivel
+            Tk().wm_withdraw()  # to hide the main window
+            messagebox.showinfo(title="WIN",
+                                message="Congrats! Do yo want to continue to next level?")
+            # Se debe pasar al sig nivel
             return
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
@@ -167,7 +168,7 @@ def placeCells(BOARD):
                             * cellBorder) + _VARS['lineWidth']/2 - 5,
             _VARS['gridOrigin'][1] + (celldimX*BOARD.goalPos[1])
             + cellBorder + (2*BOARD.goalPos[1]*cellBorder) +
-            _VARS['lineWidth']/2 -5 ,
+            _VARS['lineWidth']/2 - 5,
             celldimX + 11, celldimY + 11, GREEN)
 
 
