@@ -111,7 +111,7 @@ def main():
 
     while True:
         buttonStart = Button('Start', 100, 30)
-        checkEvents(GAMEBOARD, test, length_solucion)
+        checkEvents(GAMEBOARD, test, length_solucion, buttonStart)
         _VARS['surf'].fill(GREY)
         drawButton(buttonStart)
         drawSquareGrid(
@@ -120,7 +120,6 @@ def main():
         pygame.display.update()
         if (check_click(buttonStart) == True):
             isRunning = 1
-        print(length_solucion, len(test), isRunning)
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test) and isRunning == 1):
             length_solucion += 1
@@ -180,7 +179,7 @@ def placeCells(BOARD):
 
 def drawButton(buttonStart):
     # elevation logic
-    buttonStart.top_rect.y = 300
+    buttonStart.top_rect.y = buttonStart.y - buttonStart.elevation
     buttonStart.text_rect.center = buttonStart.top_rect.center
 
     buttonStart.bottom_rect.midtop = buttonStart.top_rect.midtop
@@ -265,13 +264,14 @@ def drawSquareGrid(origin, gridWH, cells):
 # Verifica que los eventos le den click
 
 
-def checkEvents(BOARD, solution, pos_solution):
+def checkEvents(BOARD, solution, pos_solution, buttonStart):
     global CURR_VEHICLE
     if(pos_solution < len(solution)):
         BOARD.boardMAP = solution[pos_solution].state
     else:
         BOARD.moveVehicleMain()
-    time.sleep(1)  # Here going to change for clickbutton
+    check_click(buttonStart)
+    time.sleep(0.5)  # Here going to change for clickbutton
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
