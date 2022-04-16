@@ -91,7 +91,7 @@ def main():
     CURR_VEHICLE = -1
     isRunning = 0
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, "./problem5.txt")
+    GAMEBOARD = Board(6, "./problem1.txt")
     GAMEBOARD.generatePuzzle()
 
     open_nodes = []

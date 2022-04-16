@@ -89,7 +89,8 @@ class Board:
         f = open(self.filePath, "r")
         list = f.read().split("\n")
         # CHECK WHERE THE GOAL IS IN RELATION TO THE MAIN CAR
-        self.goalPos = (int(list[1][0]), int(list[1][1]))
+        pos = list[1].split(" ")
+        self.goalPos = (int(pos[0]), int(pos[1]))
         self.checkGoalDirection()
         list = list[0].split(" ")
         for v in list:
