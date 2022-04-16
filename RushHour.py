@@ -10,6 +10,7 @@ from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
 from Board import *
 from Graph import *
 from Button import *
+import threading
 
 # CONSTANTS:
 SCREENSIZE = WIDTH, HEIGHT = 800, 600
@@ -83,59 +84,6 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     solution.reverse()
     return solution
 
-
-def main():
-    global CURR_VEHICLE, buttonStart, isRunning
-
-    # NO SELECTED VEHICLE
-    CURR_VEHICLE = -1
-    isRunning = 0
-    # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, "./problem1.txt")
-    GAMEBOARD.generatePuzzle()
-
-    open_nodes = []
-    close_nodes = []
-    length_solucion = 0
-
-    father_node = Node(
-        NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
-    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
-
-    pygame.init()
-
-    _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
-
-    pygame.display.set_caption('Rush Hour')
-    _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
-
-    while True:
-        buttonStart = Button('Start', 100, 30)
-        checkEvents(GAMEBOARD, test, length_solucion, buttonStart)
-        _VARS['surf'].fill(GREY)
-        drawButton(buttonStart)
-        drawSquareGrid(
-            _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
-        placeCells(GAMEBOARD)
-        pygame.display.update()
-        if (check_click(buttonStart) == True):
-            isRunning = 1
-        # CHECKS FOR WIN STATE
-        if(length_solucion < len(test) and isRunning == 1):
-            length_solucion += 1
-        if(GAMEBOARD.hasWon() == True):
-            Tk().wm_withdraw()  # to hide the main window
-            # answer saves what user wants (yes, no)
-            answer = messagebox.askquestion(title="WIN",
-                                            message="Congrats! Do yo want to continue to next level?")
-            # Se debe pasar al sig nivel
-            return
-            # GOES TO NEXT LEVEL
-            # GAMEBOARD.generatePuzzle()
-
-            # NEW METHOD FOR ADDING CELLS :
-
-
 def placeCells(BOARD):
     # GET CELL DIMENSIONS...
     cellBorder = 6
@@ -193,20 +141,21 @@ def drawButton(buttonStart):
 
 
 def check_click(buttonStart):
-    mouse_pos = pygame.mouse.get_pos()
-    if buttonStart.top_rect.collidepoint(mouse_pos):
-        buttonStart.top_color = (0, 86, 31)
-        if pygame.mouse.get_pressed()[0]:
-            buttonStart.movement = 0
-            buttonStart.pressed = True
-            return True
+    while(1):
+        mouse_pos = pygame.mouse.get_pos()
+        if buttonStart.top_rect.collidepoint(mouse_pos):
+            buttonStart.top_color = (0, 86, 31)
+            if pygame.mouse.get_pressed()[0]:
+                buttonStart.movement = 0
+                buttonStart.pressed = True
+                return True
+            else:
+                buttonStart.movement = buttonStart.elevation
+                if buttonStart.pressed == True:
+                    buttonStart.pressed = False
         else:
             buttonStart.movement = buttonStart.elevation
-            if buttonStart.pressed == True:
-                buttonStart.pressed = False
-    else:
-        buttonStart.movement = buttonStart.elevation
-        buttonStart.top_color = (0, 140, 51)
+            buttonStart.top_color = (0, 140, 51)
 
 
 def drawSquareCell(x, y, dimX, dimY, color):
@@ -270,8 +219,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         BOARD.boardMAP = solution[pos_solution].state
     else:
         BOARD.moveVehicleMain()
-    check_click(buttonStart)
-    time.sleep(0.5)  # Here going to change for clickbutton
+    time.sleep(0.7)  # Here going to change for clickbutton
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -281,6 +229,61 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
             sys.exit()
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
+
+def main():
+    global CURR_VEHICLE, buttonStart, isRunning
+
+    # NO SELECTED VEHICLE
+    CURR_VEHICLE = -1
+    isRunning = 0
+    # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
+    GAMEBOARD = Board(6, "./problem1.txt")
+    GAMEBOARD.generatePuzzle()
+
+    open_nodes = []
+    close_nodes = []
+    length_solucion = 0
+
+    father_node = Node(
+        NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
+    test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+
+    pygame.init()
+
+    _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
+
+    pygame.display.set_caption('Rush Hour')
+    _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
+
+    buttonStart = Button('Start', 100, 30)
+    tr = threading.Thread(target=check_click, args=(buttonStart,))
+    tr.start()
+
+    while True:
+        checkEvents(GAMEBOARD, test, length_solucion, buttonStart)
+        _VARS['surf'].fill(GREY)
+        if (tr.is_alive()):
+            drawButton(buttonStart)
+        drawSquareGrid(
+            _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
+        placeCells(GAMEBOARD)
+        pygame.display.update()
+        if (tr.is_alive() == False):
+            isRunning = 1
+        # CHECKS FOR WIN STATE
+        if(length_solucion < len(test) and isRunning == 1):
+            length_solucion += 1
+        if(GAMEBOARD.hasWon() == True):
+            Tk().wm_withdraw()  # to hide the main window
+            # answer saves what user wants (yes, no)
+            answer = messagebox.askquestion(title="WIN",
+                                            message="Congrats! Do yo want to continue to next level?")
+            # Se debe pasar al sig nivel
+            return
+            # GOES TO NEXT LEVEL
+            # GAMEBOARD.generatePuzzle()
+
+            # NEW METHOD FOR ADDING CELLS :
 
 
 if __name__ == '__main__':
