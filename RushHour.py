@@ -11,6 +11,7 @@ from Board import *
 from Graph import *
 from Button import *
 import threading
+from openFile import *
 
 # CONSTANTS:
 SCREENSIZE = WIDTH, HEIGHT = 800, 600
@@ -230,7 +231,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
 
-def main():
+def RushH(file):
     global CURR_VEHICLE, buttonStart, isRunning
 
     # NO SELECTED VEHICLE
@@ -279,12 +280,18 @@ def main():
             answer = messagebox.askquestion(title="WIN",
                                             message="Congrats! Do yo want to continue to next level?")
             # Se debe pasar al sig nivel
-            return
+            if(answer=='yes'):
+                mainFile()
+                pygame.quit()
+                
+            else:
+                RushH(file)
+                
+            #print(answer)
+            #mainFile()
+            #pygame.quit()
+                
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
 
             # NEW METHOD FOR ADDING CELLS :
-
-
-if __name__ == '__main__':
-    main()

@@ -1,0 +1,3 @@
+from openFile import *
+
+mainFile()
