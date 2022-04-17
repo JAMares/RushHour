@@ -40,7 +40,7 @@ def mainFile():
         activebackground='#007A2C',
         activeforeground='White',
         font=('arial bold', 15)).pack(pady=20)
-#root.mainloop()
+    root.mainloop()
 
 #root.destroy()
 

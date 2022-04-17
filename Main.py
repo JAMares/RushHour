@@ -1,3 +1,4 @@
 from openFile import *
 
-mainFile()
+if __name__ == "__main__":
+    mainFile()

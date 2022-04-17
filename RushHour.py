@@ -283,6 +283,7 @@ def RushH(file):
             if(answer=='yes'):
                 mainFile()
                 pygame.quit()
+                return
                 
             else:
                 RushH(file)
