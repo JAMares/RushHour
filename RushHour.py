@@ -4,6 +4,7 @@ import sys
 import copy
 import time
 import pygame
+import tkinter
 from tkinter import *
 from tkinter import messagebox
 from pygame.locals import KEYDOWN, K_q, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_1, K_9
@@ -84,6 +85,7 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
         currentNode = currentNode.father
     solution.reverse()
     return solution
+
 
 def placeCells(BOARD):
     # GET CELL DIMENSIONS...
@@ -214,6 +216,15 @@ def drawSquareGrid(origin, gridWH, cells):
 # Verifica que los eventos le den click
 
 
+def prompt_file():
+    """Create a Tk file dialog and cleanup when finished"""
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.askopenfilename(parent=top)
+    top.destroy()
+    return file_name
+
+
 def checkEvents(BOARD, solution, pos_solution, buttonStart):
     global CURR_VEHICLE
     if(pos_solution < len(solution)):
@@ -231,6 +242,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
 
+
 def RushH(file):
     global CURR_VEHICLE, buttonStart, isRunning
 
@@ -238,7 +250,8 @@ def RushH(file):
     CURR_VEHICLE = -1
     isRunning = 0
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, "./problem1.txt")
+    filepath = prompt_file()
+    GAMEBOARD = Board(6, filepath)
     GAMEBOARD.generatePuzzle()
 
     open_nodes = []
@@ -280,19 +293,21 @@ def RushH(file):
             answer = messagebox.askquestion(title="WIN",
                                             message="Congrats! Do yo want to continue to next level?")
             # Se debe pasar al sig nivel
-            if(answer=='yes'):
-                mainFile()
+            if(answer == 'yes'):
+                prompt_file()
+                pygame.quit()
+                RushH(NULL)
+
+            else:
                 pygame.quit()
                 return
-                
-            else:
-                RushH(file)
-                
-            #print(answer)
-            #mainFile()
-            #pygame.quit()
-                
+
+            # print(answer)
+            # mainFile()
+            # pygame.quit()
+
             # GOES TO NEXT LEVEL
             # GAMEBOARD.generatePuzzle()
 
             # NEW METHOD FOR ADDING CELLS :
+RushH(NULL)
