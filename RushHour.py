@@ -89,8 +89,7 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     except:
         messagebox.showinfo(message="Solution was not found. Select another file.", title="ERROR")
         showRoot()
-        
-        
+        return False
 
 
 def placeCells(BOARD):
@@ -151,7 +150,7 @@ def drawButton(buttonStart):
 
 def check_click(buttonStart):
     while(1):
-        print("E")
+        time.sleep(0)
         mouse_pos = pygame.mouse.get_pos()
         if buttonStart.top_rect.collidepoint(mouse_pos):
             buttonStart.top_color = (0, 86, 31)
@@ -228,7 +227,7 @@ def openFile():
                                           ("all files","*.*")))
     #print(filepath)
     file = open(filepath,'r')
-    print(file.read())
+    #print(file.read())
     file.close()
     root.withdraw()
     RushH(filepath)
@@ -300,6 +299,9 @@ def RushH(file):
     start_time = time.time()
     
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    
+    if(test == False):
+        return
 
     #Finish Time
     total_time = time.time() - start_time
@@ -333,8 +335,13 @@ def RushH(file):
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
-            answer = messagebox.askquestion(title="You Won",
-                                            message="Congrats! Your problem was solved in " + str(movement) + " movements and " + str(total_time) + " seconds.")
+            messagebox.showinfo(title="WIN",
+                                            message="Congrats! Your problem was solved in " + 
+                                            str(movement) + " movements and " + str(total_time) + 
+                                            " seconds.")
+            answer = messagebox.askquestion(title="¿Do you want to select another problem?",
+                                            message="NOTE: If you don't, the actual problem will be repeated.")
+            time.sleep(0)
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
                 showRoot()
@@ -346,12 +353,5 @@ def RushH(file):
                 RushH(file)
                 return
 
-            # print(answer)
-            # mainFile()
-            # pygame.quit()
-
-            # GOES TO NEXT LEVEL
-            # GAMEBOARD.generatePuzzle()
-
-            # NEW METHOD FOR ADDING CELLS :
-prompt_file()
+if __name__ == "__main__":
+    prompt_file()
