@@ -12,7 +12,7 @@ from Board import *
 from Graph import *
 from Button import *
 import threading
-from openFile import *
+from tkinter import filedialog
 
 # CONSTANTS:
 SCREENSIZE = WIDTH, HEIGHT = 800, 600
@@ -145,6 +145,7 @@ def drawButton(buttonStart):
 
 def check_click(buttonStart):
     while(1):
+        print("E")
         mouse_pos = pygame.mouse.get_pos()
         if buttonStart.top_rect.collidepoint(mouse_pos):
             buttonStart.top_color = (0, 86, 31)
@@ -214,15 +215,45 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
 # Verifica que los eventos le den click
-
+def openFile():
+    filepath = filedialog.askopenfilename(initialdir="C:\\Users\\Cakow\\PycharmProjects\\Main",
+                                          title="Open file okay?",
+                                          filetypes= (("text files","*.txt"),
+                                          ("all files","*.*")))
+    #print(filepath)
+    file = open(filepath,'r')
+    print(file.read())
+    file.close()
+    root.withdraw()
+    RushH(filepath)
 
 def prompt_file():
     """Create a Tk file dialog and cleanup when finished"""
-    top = tkinter.Tk()
-    top.withdraw()  # hide window
-    file_name = tkinter.filedialog.askopenfilename(parent=top)
-    top.destroy()
-    return file_name
+    global root
+    
+    root = tkinter.Tk()
+    root.config(width=300, height=200)
+    root.title("Rush Hour")
+
+    Welcome = tkinter.Label(text = "    Welcome to Rush Hour Game!    ",
+                 font=('arial bold', 18))
+    Welcome.pack()
+
+    File = tkinter.Label(text = "    Select the file of the game you want to resolve.    ",
+                 font=('Helvetica roman', 13))
+    File.pack()
+
+    boton = tkinter.Button(
+        text="Select file",
+        command=openFile,
+        bg='#008C33',
+        fg='White',
+        activebackground='#007A2C',
+        activeforeground='White',
+        font=('arial bold', 15)).pack(pady=20)
+
+def showRoot():
+    root.deiconify()
 
 
 def checkEvents(BOARD, solution, pos_solution, buttonStart):
@@ -244,14 +275,12 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
 
 
 def RushH(file):
-    global CURR_VEHICLE, buttonStart, isRunning
+    global CURR_VEHICLE, buttonStart
 
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
-    isRunning = 0
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    filepath = prompt_file()
-    GAMEBOARD = Board(6, filepath)
+    GAMEBOARD = Board(6, file)
     GAMEBOARD.generatePuzzle()
 
     open_nodes = []
@@ -260,7 +289,17 @@ def RushH(file):
 
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
+
+    #Inicial Time
+    start_time = time.time()
+    
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+
+    #Finish Time
+    total_time = time.time() - start_time
+
+    #Total Movements
+    movement = len(test)
 
     pygame.init()
 
@@ -282,24 +321,24 @@ def RushH(file):
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
-        if (tr.is_alive() == False):
-            isRunning = 1
         # CHECKS FOR WIN STATE
-        if(length_solucion < len(test) and isRunning == 1):
+        if(length_solucion < len(test) and tr.is_alive() == False):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
-            answer = messagebox.askquestion(title="WIN",
-                                            message="Congrats! Do yo want to continue to next level?")
+            answer = messagebox.askquestion(title="You Won",
+                                            message="Congrats! Your problem was solved in " + str(movement) + " movements and " + str(total_time) + " seconds.")
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
-                prompt_file()
+                showRoot()
                 pygame.quit()
-                RushH(NULL)
+                #sys.exit(0)
+                return
 
             else:
                 pygame.quit()
+                RushH(file)
                 return
 
             # print(answer)
@@ -310,4 +349,4 @@ def RushH(file):
             # GAMEBOARD.generatePuzzle()
 
             # NEW METHOD FOR ADDING CELLS :
-RushH(NULL)
+prompt_file()
