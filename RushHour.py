@@ -250,7 +250,10 @@ def RushH(file):
     CURR_VEHICLE = -1
     isRunning = 0
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    filepath = prompt_file()
+    if file != NULL:
+        filepath = file
+    else:
+        filepath = prompt_file()
     GAMEBOARD = Board(6, filepath)
     GAMEBOARD.generatePuzzle()
 
@@ -303,10 +306,12 @@ def RushH(file):
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
-            answer = messagebox.askquestion(title="WIN",
+            messagebox.showinfo(title="WIN",
                                             message="Congrats! Your problem was solved in " + 
                                             str(movement) + " movements and " + str(total_time) + 
                                             " seconds.")
+            answer = messagebox.askquestion(title="¿Desea elegir otro problema?",
+                                            message="NOTA: Si selecciona no se repetira el problema actual")
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
                 pygame.quit()
@@ -314,7 +319,7 @@ def RushH(file):
 
             else:
                 pygame.quit()
-                quit()
+                RushH(filepath)
 
             # print(answer)
             # mainFile()
