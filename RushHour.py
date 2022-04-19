@@ -74,7 +74,7 @@ def checkNodeRepetition(newNode, nodeList):
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     currentNode = root
     open_nodes.append(currentNode)
-    while (currentNode.blocked > 0):
+    while (currentNode.blocked > 0 and len(open_nodes) > 0):
         currentNode = open_nodes.pop(0)
         open_nodes = createNodes(
             currentNode, GAMEBOARD, open_nodes, close_nodes)
@@ -289,6 +289,14 @@ def RushH(file):
         pygame.display.update()
         if (tr.is_alive() == False):
             isRunning = 1
+        # CHECKS FOR NO SOLUTION
+        if (test[-1].blocked > 0):
+            Tk().wm_withdraw()  # to hide the main window
+            # answer saves what user wants (yes, no)
+            answer = messagebox.showinfo(title="Sorry!",
+                                            message="The board configuration provided doesn't have solution.")
+            pygame.quit()
+            RushH(NULL)
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test) and isRunning == 1):
             length_solucion += 1
@@ -296,18 +304,17 @@ def RushH(file):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
             answer = messagebox.askquestion(title="WIN",
-                                            message="Congrats! Your problema was solved in " + 
+                                            message="Congrats! Your problem was solved in " + 
                                             str(movement) + " movements and " + str(total_time) + 
                                             " seconds.")
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
-                prompt_file()
                 pygame.quit()
                 RushH(NULL)
 
             else:
                 pygame.quit()
-                return
+                quit()
 
             # print(answer)
             # mainFile()
@@ -317,4 +324,5 @@ def RushH(file):
             # GAMEBOARD.generatePuzzle()
 
             # NEW METHOD FOR ADDING CELLS :
+        
 RushH(NULL)
