@@ -222,7 +222,7 @@ def drawSquareGrid(origin, gridWH, cells):
 # Verifica que los eventos le den click
 def openFile():
     filepath = filedialog.askopenfilename(initialdir="C:\\Users\\Cakow\\PycharmProjects\\Main",
-                                          title="Open file okay?",
+                                          title="Select one file",
                                           filetypes= (("text files","*.txt"),
                                           ("all files","*.*")))
     #print(filepath)
@@ -239,6 +239,7 @@ def prompt_file():
     root = tkinter.Tk()
     root.config(width=300, height=200)
     root.title("Rush Hour")
+    root.eval('tk::PlaceWindow . center')
 
     Welcome = tkinter.Label(text = "    Welcome to Rush Hour Game!    ",
                  font=('arial bold', 18))
