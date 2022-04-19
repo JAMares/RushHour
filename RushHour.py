@@ -260,7 +260,12 @@ def RushH(file):
 
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
+    
+    start_time = time.time()
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    total_time = time.time() - start_time
+
+    movement = len(test)
 
     pygame.init()
 
@@ -291,7 +296,9 @@ def RushH(file):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
             answer = messagebox.askquestion(title="WIN",
-                                            message="Congrats! Do yo want to continue to next level?")
+                                            message="Congrats! Your problema was solved in " + 
+                                            str(movement) + " movements and " + str(total_time) + 
+                                            " seconds.")
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
                 prompt_file()
