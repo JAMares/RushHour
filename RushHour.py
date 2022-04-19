@@ -72,19 +72,25 @@ def checkNodeRepetition(newNode, nodeList):
 
 
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
-    currentNode = root
-    open_nodes.append(currentNode)
-    while (currentNode.blocked > 0):
-        currentNode = open_nodes.pop(0)
-        open_nodes = createNodes(
-            currentNode, GAMEBOARD, open_nodes, close_nodes)
-        close_nodes.append(currentNode)
-    solution = []
-    while(currentNode != 0):
-        solution.append(currentNode)
-        currentNode = currentNode.father
-    solution.reverse()
-    return solution
+    try:
+        currentNode = root
+        open_nodes.append(currentNode)
+        while (currentNode.blocked > 0):
+            currentNode = open_nodes.pop(0)
+            open_nodes = createNodes(
+                currentNode, GAMEBOARD, open_nodes, close_nodes)
+            close_nodes.append(currentNode)
+        solution = []
+        while(currentNode != 0):
+            solution.append(currentNode)
+            currentNode = currentNode.father
+        solution.reverse()
+        return solution
+    except:
+        messagebox.showinfo(message="Solution was not found. Select another file.", title="ERROR")
+        showRoot()
+        
+        
 
 
 def placeCells(BOARD):
@@ -333,7 +339,6 @@ def RushH(file):
             if(answer == 'yes'):
                 showRoot()
                 pygame.quit()
-                #sys.exit(0)
                 return
 
             else:
