@@ -72,25 +72,19 @@ def checkNodeRepetition(newNode, nodeList):
 
 
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
-    try:
-        currentNode = root
-        open_nodes.append(currentNode)
-        while (currentNode.blocked > 0):
-            currentNode = open_nodes.pop(0)
-            open_nodes = createNodes(
-                currentNode, GAMEBOARD, open_nodes, close_nodes)
-            close_nodes.append(currentNode)
-        solution = []
-        while(currentNode != 0):
-            solution.append(currentNode)
-            currentNode = currentNode.father
-        solution.reverse()
-        return solution
-    except:
-        messagebox.showinfo(message="Solution was not found. Select another file.", title="ERROR")
-        showRoot()
-        
-        
+    currentNode = root
+    open_nodes.append(currentNode)
+    while (currentNode.blocked > 0 and len(open_nodes) > 0):
+        currentNode = open_nodes.pop(0)
+        open_nodes = createNodes(
+            currentNode, GAMEBOARD, open_nodes, close_nodes)
+        close_nodes.append(currentNode)
+    solution = []
+    while(currentNode != 0):
+        solution.append(currentNode)
+        currentNode = currentNode.father
+    solution.reverse()
+    return solution
 
 
 def placeCells(BOARD):
@@ -286,7 +280,11 @@ def RushH(file):
     # NO SELECTED VEHICLE
     CURR_VEHICLE = -1
     # FILE PATH SELECTION SHOULD BE WITHIN INTERFACE
-    GAMEBOARD = Board(6, file)
+    if file != NULL:
+        filepath = file
+    else:
+        filepath = prompt_file()
+    GAMEBOARD = Board(6, filepath)
     GAMEBOARD.generatePuzzle()
 
     open_nodes = []
@@ -295,11 +293,12 @@ def RushH(file):
 
     father_node = Node(
         NULL, 0, GAMEBOARD.calculateCurrentStateCost(), GAMEBOARD.boardMAP, copy.deepcopy(GAMEBOARD.vehicles))
-
-    #Inicial Time
-    start_time = time.time()
     
+    start_time = time.time()
     test = a_estrella(father_node, open_nodes, close_nodes, GAMEBOARD)
+    total_time = time.time() - start_time
+
+    movement = len(test)
 
     #Finish Time
     total_time = time.time() - start_time
@@ -327,24 +326,36 @@ def RushH(file):
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
+        if (tr.is_alive() == False):
+            isRunning = 1
+        # CHECKS FOR NO SOLUTION
+        if (test[-1].blocked > 0):
+            Tk().wm_withdraw()  # to hide the main window
+            # answer saves what user wants (yes, no)
+            answer = messagebox.showinfo(title="Sorry!",
+                                            message="The board configuration provided doesn't have solution.")
+            pygame.quit()
+            RushH(NULL)
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test) and tr.is_alive() == False):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
-            answer = messagebox.askquestion(title="You Won",
-                                            message="Congrats! Your problem was solved in " + str(movement) + " movements and " + str(total_time) + " seconds.")
+            messagebox.showinfo(title="WIN",
+                                            message="Congrats! Your problem was solved in " + 
+                                            str(movement) + " movements and " + str(total_time) + 
+                                            " seconds.")
+            answer = messagebox.askquestion(title="¿Do you want to select another problem?",
+                                            message="NOTE: If you don't, the actual problem will be repeated.")
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
-                showRoot()
                 pygame.quit()
                 return
 
             else:
                 pygame.quit()
-                RushH(file)
-                return
+                RushH(filepath)
 
             # print(answer)
             # mainFile()
@@ -354,4 +365,5 @@ def RushH(file):
             # GAMEBOARD.generatePuzzle()
 
             # NEW METHOD FOR ADDING CELLS :
-prompt_file()
+        
+RushH(NULL)
