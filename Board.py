@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import random
 from Vehicle import *
 
@@ -13,20 +14,39 @@ COLOR_SELECTION = [(0, 0, 204), (0, 204, 204), (204, 204, 0),
 
 
 class Board:
-    def __init__(self, gridSize, goal, puzzleFile):
+    def __init__(self, gridSize, puzzleFile):
         self.boardMAP = np.zeros((gridSize, gridSize), dtype=int)
-        self.goalPos = goal
+        self.goalPos = ()
         self.vehicles = []
         self.colors = []
         self.level = 0
         self.filePath = puzzleFile
+        self.goalDirection = -1
+
+    def checkGoalDirection(self):
+        if(self.goalPos[0] == -1 or self.goalPos[1] == -1):
+            self.goalDirection = 0
+        else:
+            self.goalDirection = 1
+        return
 
     def hasWon(self):
         # CHECKS IF FRONT OF MAIN VEHICLE COLLIDES WITH GOAL POSITION
         v = self.getVehicle(1)
-        if(v != -1):
-            if(v.position[0]+1 == self.goalPos[0]):
-                return True
+        if(v.orientation == "v"):
+            if(self.goalDirection == 0):
+                if(v.position[1] == -1):
+                    return True
+            else:
+                if(v.position[1]+1 == 6):
+                    return True
+        else:
+            if(self.goalDirection == 0):
+                if(v.position[0] == -1):
+                    return True
+            else:
+                if(v.position[0]+1 == 6):
+                    return True
         return False
 
     def checkCollision(self, vehicle):
@@ -68,14 +88,11 @@ class Board:
         self.resetBoard()
         f = open(self.filePath, "r")
         list = f.read().split("\n")
-        # CHECKS FOR AVAILABLE LEVELS
-        if(len(list) > self.level):
-            list = list[self.level].split(" ")
-        else:
-            # WHEN LEVELS RUN OUT, SHOULD ALSO BE POP UP OR LEVELS REMOVED AS A FEATURE
-            raise SystemExit(str("All levels complete"))
-        # PREPARES FOR NEXT LEVEL
-        self.level += 1
+        # CHECK WHERE THE GOAL IS IN RELATION TO THE MAIN CAR
+        pos = list[1].split(" ")
+        self.goalPos = (int(pos[0]), int(pos[1]))
+        self.checkGoalDirection()
+        list = list[0].split(" ")
         for v in list:
             id = len(self.vehicles) + 1
             vehicle = Vehicle(id, 0, (int(
@@ -136,6 +153,13 @@ class Board:
         pos = (vehicle.position[0], vehicle.position[1])
         # CHECKS ORIENTATION OF VEHICLE
         if(vehicle.orientation == "v"):
+            # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+            if(vehicle.isMain == True):
+                if(self.goalDirection == 0 and vehicle.position[1] == self.goalPos[1] + 1):
+                    # SETS UP WIN STATE
+                    vehicle.position = (
+                        vehicle.position[0], vehicle.position[1] - 1)
+                    return True
             # MOVES VEHICLE UP
             vehicle.position = (pos[0], pos[1] - amount)
             if(self.checkCollision(vehicle) == False):
@@ -147,6 +171,13 @@ class Board:
                 vehicle.position = pos
                 return False
         else:
+            # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+            if(vehicle.isMain == True):
+                if(self.goalDirection == 0 and vehicle.position[0] == self.goalPos[0] + 1):
+                    # SETS UP WIN STATE
+                    vehicle.position = (
+                        vehicle.position[0] - 1, vehicle.position[1])
+                    return True
             # MOVES VEHICLE LEFT
             vehicle.position = (pos[0] - amount, pos[1])
             if(self.checkCollision(vehicle) == False):
@@ -158,20 +189,34 @@ class Board:
                 vehicle.position = pos
                 return False
 
+    def moveVehicleMain(self):
+        vehicle = self.getVehicle(1)
+        if(vehicle.orientation == "v"):
+            if(self.goalDirection == 0):
+                return self.moveVehicleLeftUp(1, 1)
+            else:
+                return self.moveVehicleRightDown(1, 1)
+        else:
+            if(self.goalDirection == 0):
+                return self.moveVehicleLeftUp(1, 1)
+            else:
+                return self.moveVehicleRightDown(1, 1)
+
     def moveVehicleRightDown(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
         if(vehicle == -1):
             return
-        # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
-        if(vehicle.isMain == True and vehicle.position[0] == self.goalPos[0] - vehicle.size):
-            # SETS UP WIN STATE
-            vehicle.position = (
-                vehicle.position[0]+1, vehicle.position[1])
-            return True
         # COPIES OLD POSITION
         pos = (vehicle.position[0], vehicle.position[1])
         # CHECKS ORIENTATION OF VEHICLE
         if(vehicle.orientation == "v"):
+            # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+            if(vehicle.isMain == True):
+                if(self.goalDirection == 1 and vehicle.position[1] == self.goalPos[1] - vehicle.size):
+                    # SETS UP WIN STATE
+                    vehicle.position = (
+                        vehicle.position[0], vehicle.position[1]+1)
+                    return True
             # MOVES VEHICLE DOWN
             vehicle.position = (pos[0], pos[1] + amount)
             if(self.checkCollision(vehicle) == False):
@@ -182,6 +227,13 @@ class Board:
                 vehicle.position = pos
                 return False
         else:
+            # CHECKS IF NEXT MOVEMENT IS WIN MOVEMENT
+            if(vehicle.isMain == True):
+                if(self.goalDirection == 1 and vehicle.position[0] == self.goalPos[0] - vehicle.size):
+                    # SETS UP WIN STATE
+                    vehicle.position = (
+                        vehicle.position[0]+1, vehicle.position[1])
+                    return True
             # MOVES VEHICLE RIGHT
             vehicle.position = (pos[0] + amount, pos[1])
             if(self.checkCollision(vehicle) == False):
@@ -229,8 +281,14 @@ class Board:
         return (count, counted)
 
     def calculateCurrentStateCost(self):
-        res = self.countObstaclesRightDown(1)
+        res = []
+        # CHECKS WHERE GOAL IS TO COUNT OBSTACLES BETWEEN IT AND MAIN CAR
+        if(self.goalDirection == 0):
+            res = self.countObstaclesLeftUp(1)
+        else:
+            res = self.countObstaclesRightDown(1)
         cost = res[0]
+        # COUNTS OBSTACLES OF OBSTACLES AND GETS LOWER BOUND
         for v in res[1]:
             res1 = self.countObstaclesLeftUp(v)
             res2 = self.countObstaclesRightDown(v)
@@ -240,14 +298,17 @@ class Board:
     # THIS FUNCTION CAN BE MODIFIED TO EXCLUDE THE PREVIOUS STATE FROM THE RESULTS
     def expandPossibleStates(self):
         states = []
+        vehiculos = []
         # FOR EACH VEHICLE CHECK IF A MOVEMENT IS POSSIBLE
         for v in self.vehicles:
             test = self.moveVehicleLeftUp(v.identification, 1)
             if(test == True):
                 states.append(self.boardMAP.copy())
+                vehiculos.append(copy.deepcopy(self.vehicles))
                 self.moveVehicleRightDown(v.identification, 1)
             test = self.moveVehicleRightDown(v.identification, 1)
             if(test == True):
                 states.append(self.boardMAP.copy())
+                vehiculos.append(copy.deepcopy(self.vehicles))
                 self.moveVehicleLeftUp(v.identification, 1)
-        return states
+        return [states, vehiculos]
