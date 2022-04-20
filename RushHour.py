@@ -15,7 +15,7 @@ import threading
 from tkinter import filedialog
 
 # CONSTANTS:
-SCREENSIZE = WIDTH, HEIGHT = 800, 600
+SCREENSIZE = WIDTH, HEIGHT = 875, 600
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -25,7 +25,7 @@ GREY = (160, 160, 160)
 
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
-         'gridOrigin': (200, 100), 'gridCells': 0, 'lineWidth': 2}
+         'gridOrigin': (100, 100), 'gridCells': 0, 'lineWidth': 2}
 # CURRENT SELECTED VEHICLE
 global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
@@ -225,12 +225,10 @@ def openFile():
                                           title="Select one file",
                                           filetypes= (("text files","*.txt"),
                                           ("all files","*.*")))
-    #print(filepath)
     file = open(filepath,'r')
-    #print(file.read())
     file.close()
-    root.withdraw()
     RushH(filepath)
+    
 
 def prompt_file():
     """Create a Tk file dialog and cleanup when finished"""
@@ -310,6 +308,7 @@ def RushH(file):
     #Total Movements
     movement = len(test)
 
+    root.withdraw()
     pygame.init()
 
     _VARS['gridCells'] = GAMEBOARD.boardMAP.shape[0]
@@ -326,6 +325,20 @@ def RushH(file):
         _VARS['surf'].fill(GREY)
         if (tr.is_alive()):
             drawButton(buttonStart)
+
+        font = pygame.font.SysFont(None, 24)
+        tittle2 = font.render('Problem solved in:', True, 'black')
+        _VARS['surf'].blit(tittle2, (620, 100))
+
+        tittle2 = font.render(str(movement) + ' movements', True, 'black')
+        _VARS['surf'].blit(tittle2, (620, 130))
+
+        tittle2 = font.render('Seconds it took to solve it: ', True, 'black')
+        _VARS['surf'].blit(tittle2, (620, 170))
+        
+        tittle2 = font.render(str(total_time), True, 'black')
+        _VARS['surf'].blit(tittle2, (620, 200))
+            
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
@@ -334,15 +347,11 @@ def RushH(file):
         if(length_solucion < len(test) and tr.is_alive() == False):
             length_solucion += 1
         if(GAMEBOARD.hasWon() == True):
+            time.sleep(0)
             Tk().wm_withdraw()  # to hide the main window
             # answer saves what user wants (yes, no)
-            messagebox.showinfo(title="WIN",
-                                            message="Congrats! Your problem was solved in " + 
-                                            str(movement) + " movements and " + str(total_time) + 
-                                            " seconds.")
             answer = messagebox.askquestion(title="¿Do you want to select another problem?",
                                             message="NOTE: If you don't, the actual problem will be repeated.")
-            time.sleep(0)
             # Se debe pasar al sig nivel
             if(answer == 'yes'):
                 showRoot()
