@@ -7,7 +7,7 @@ class Button:
 		self.pressed = False
 		self.elevation = 3
 		self.movement = 3
-		self.y = 475
+		self.y = 525
 		self.word = text
 
 		#Top
