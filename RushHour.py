@@ -85,6 +85,16 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
             solution.append(currentNode)
             currentNode = currentNode.father
         solution.reverse()
+        currentNode = solution[-1]
+        while(GAMEBOARD.hasWon() != True):
+            GAMEBOARD.boardMAP = currentNode.state.copy()
+            GAMEBOARD.vehicles = copy.deepcopy(currentNode.vehicles)
+            GAMEBOARD.moveVehicleMain()
+            newNode = Node(currentNode, currentNode.movements+1, 0,
+                           GAMEBOARD.boardMAP.copy(), copy.deepcopy(GAMEBOARD.vehicles))
+            solution.append(newNode)
+            currentNode = newNode
+
         return solution
     except:
         messagebox.showinfo(
@@ -279,8 +289,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
     global CURR_VEHICLE
     if(pos_solution < len(solution)):
         BOARD.boardMAP = solution[pos_solution].state
-    else:
-        BOARD.moveVehicleMain()
+        BOARD.vehicles = solution[pos_solution].vehicles
     time.sleep(1)  # Se mueve cuando se presiona
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -289,8 +298,6 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         elif event.type == KEYDOWN and event.key == K_q:
             pygame.quit()
             sys.exit()
-        elif event.type == KEYDOWN and event.key == 103:
-            BOARD.expandPossibleStates()
 
 # Main Function
 
@@ -336,6 +343,9 @@ def RushH(file):
     buttonStart = Button('Start', 100, 30)
     tr = threading.Thread(target=check_click, args=(buttonStart,))
     tr.start()
+
+    GAMEBOARD.boardMAP = test[0].state
+    GAMEBOARD.vehicles = test[0].vehicles
 
     while True:
         checkEvents(GAMEBOARD, test, length_solucion, buttonStart)
