@@ -15,7 +15,7 @@ import threading
 from tkinter import filedialog
 
 # CONSTANTS:
-SCREENSIZE = WIDTH, HEIGHT = 875, 600
+SCREENSIZE = WIDTH, HEIGHT = 875, 650
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -25,7 +25,7 @@ GREY = (160, 160, 160)
 
 # SCREEN DATA
 _VARS = {'surf': False, 'gridWH': 400,
-         'gridOrigin': (100, 100), 'gridCells': 0, 'lineWidth': 2}
+         'gridOrigin': (100, 150), 'gridCells': 0, 'lineWidth': 2}
 # CURRENT SELECTED VEHICLE
 global CURR_VEHICLE
 # INITIALIZES GAME BOARD, WIN POS AT x:6, y:2 (OUTSIDE MAIN PLAY AREA)
@@ -322,22 +322,26 @@ def RushH(file):
 
     while True:
         checkEvents(GAMEBOARD, test, length_solucion, buttonStart)
-        _VARS['surf'].fill(GREY)
+        _VARS['surf'].fill('#eae4e9')
         if (tr.is_alive()):
             drawButton(buttonStart)
 
+        fontT = pygame.font.SysFont(None, 50)
+        tittle2 = fontT.render('Rush Hour', True, '#277da1')
+        _VARS['surf'].blit(tittle2, (350, 50))
+
         font = pygame.font.SysFont(None, 24)
         tittle2 = font.render('Problem solved in:', True, 'black')
-        _VARS['surf'].blit(tittle2, (620, 100))
+        _VARS['surf'].blit(tittle2, (620, 150))
 
         tittle2 = font.render(str(movement) + ' movements', True, 'black')
-        _VARS['surf'].blit(tittle2, (620, 130))
+        _VARS['surf'].blit(tittle2, (620, 180))
 
         tittle2 = font.render('Seconds it took to solve it: ', True, 'black')
-        _VARS['surf'].blit(tittle2, (620, 170))
+        _VARS['surf'].blit(tittle2, (620, 220))
         
         tittle2 = font.render(str(total_time), True, 'black')
-        _VARS['surf'].blit(tittle2, (620, 200))
+        _VARS['surf'].blit(tittle2, (620, 250))
             
         drawSquareGrid(
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
