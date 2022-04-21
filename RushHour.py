@@ -295,9 +295,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == KEYDOWN and event.key == K_q:
-            pygame.quit()
-            sys.exit()
+            return
 
 # Main Function
 
