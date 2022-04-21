@@ -10,7 +10,10 @@ COLOR_SELECTION = [(0, 0, 204), (0, 204, 204), (204, 204, 0),
                    (204, 102, 0), (153, 102, 0), (153, 0, 204),
                    (153, 204, 255), (102, 153, 0), (102, 102, 153),
                    (255, 153, 204), (153, 255, 51), (204, 153, 255),
-                   (0, 51, 0), (153, 255, 204), (255, 204, 153)]
+                   (0, 51, 0), (153, 255, 204), (255, 204, 153),
+                   (118, 39, 108),(244, 252, 99),(72, 185, 114)]
+
+print(len(COLOR_SELECTION))
 
 
 class Board:
@@ -83,7 +86,7 @@ class Board:
 
     def generatePuzzle(self):
         # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
-        self.colors = random.sample(COLOR_SELECTION, 15)
+        self.colors = random.sample(COLOR_SELECTION, 17)
         # CLEARS VARIABLE AND WIN STATE
         self.resetBoard()
         f = open(self.filePath, "r")
@@ -140,10 +143,7 @@ class Board:
                 self.boardMAP[x][y+i] = vehicle.identification
 
     def getVehicle(self, vehicleId):
-        for vehicle in self.vehicles:
-            if (vehicle.identification == vehicleId):
-                return vehicle
-        return -1
+        return self.vehicles[vehicleId-1]
 
     def moveVehicleLeftUp(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
@@ -292,7 +292,7 @@ class Board:
         for v in res[1]:
             res1 = self.countObstaclesLeftUp(v)
             res2 = self.countObstaclesRightDown(v)
-            cost += res1[0] if res1[0] <= res2[0] and res1[0] != 0 else res2[0]
+            cost += res1[0] if res1[0] <= res2[0] else res2[0]
         return cost
 
     # THIS FUNCTION CAN BE MODIFIED TO EXCLUDE THE PREVIOUS STATE FROM THE RESULTS
