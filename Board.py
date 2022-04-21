@@ -292,7 +292,7 @@ class Board:
         for v in res[1]:
             res1 = self.countObstaclesLeftUp(v)
             res2 = self.countObstaclesRightDown(v)
-            cost += res1[0] if res1[0] <= res2[0] and res1[0] != 0 else res2[0]
+            cost += res1[0] if res1[0] <= res2[0] else res2[0]
         return cost
 
     # THIS FUNCTION CAN BE MODIFIED TO EXCLUDE THE PREVIOUS STATE FROM THE RESULTS
