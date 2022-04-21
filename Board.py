@@ -10,7 +10,10 @@ COLOR_SELECTION = [(0, 0, 204), (0, 204, 204), (204, 204, 0),
                    (204, 102, 0), (153, 102, 0), (153, 0, 204),
                    (153, 204, 255), (102, 153, 0), (102, 102, 153),
                    (255, 153, 204), (153, 255, 51), (204, 153, 255),
-                   (0, 51, 0), (153, 255, 204), (255, 204, 153)]
+                   (0, 51, 0), (153, 255, 204), (255, 204, 153),
+                   (118, 39, 108),(244, 252, 99),(72, 185, 114)]
+
+print(len(COLOR_SELECTION))
 
 
 class Board:
@@ -83,7 +86,7 @@ class Board:
 
     def generatePuzzle(self):
         # GENERATES RANDOM LIST CONTAINING 15 PRE-LOADED COLORS MINUS RED
-        self.colors = random.sample(COLOR_SELECTION, 15)
+        self.colors = random.sample(COLOR_SELECTION, 17)
         # CLEARS VARIABLE AND WIN STATE
         self.resetBoard()
         f = open(self.filePath, "r")
