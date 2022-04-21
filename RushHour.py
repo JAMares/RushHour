@@ -253,6 +253,7 @@ def prompt_file():
         activebackground='#007A2C',
         activeforeground='White',
         font=('arial bold', 15)).pack(pady=20)
+    root.mainloop()
 
 #Shows file window
 def showRoot():
@@ -300,8 +301,6 @@ def RushH(file):
     
     if(test == False):
         return
-
-    print(test)
 
     #Finish Time
     total_time = time.time() - start_time
