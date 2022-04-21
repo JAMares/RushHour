@@ -140,10 +140,7 @@ class Board:
                 self.boardMAP[x][y+i] = vehicle.identification
 
     def getVehicle(self, vehicleId):
-        for vehicle in self.vehicles:
-            if (vehicle.identification == vehicleId):
-                return vehicle
-        return -1
+        return self.vehicles[vehicleId-1]
 
     def moveVehicleLeftUp(self, vehicleId, amount):
         vehicle = self.getVehicle(vehicleId)
