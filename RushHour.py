@@ -330,7 +330,7 @@ def RushH(file):
         #Shows movements and time
         fontT = pygame.font.SysFont(None, 50)
         tittle2 = fontT.render('Rush Hour', True, '#277da1')
-        _VARS['surf'].blit(tittle2, (350, 50))
+        _VARS['surf'].blit(tittle2, (350, 30))
 
         font = pygame.font.SysFont(None, 24)
         tittle2 = font.render('Problem solved in:', True, 'black')
