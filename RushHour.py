@@ -52,8 +52,6 @@ def createNodes(node: Node, board, openNodes, closeNodes):
     return openNodes
 
 # Function to insert open nodes avoiding repetitions
-
-
 def checkNodeRepetition(newNode, nodeList):
     maxR = len(newNode.vehicles)
     for node in nodeList:
@@ -69,8 +67,6 @@ def checkNodeRepetition(newNode, nodeList):
     return False
 
 # Function to check if a node was already considerate before
-
-
 def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
     try:
         currentNode = root
@@ -91,7 +87,7 @@ def a_estrella(root: Node, open_nodes, close_nodes, GAMEBOARD):
         showRoot()
         return False
 
-
+#Draw cells
 def placeCells(BOARD):
     # GET CELL DIMENSIONS...
     cellBorder = 6
@@ -132,7 +128,6 @@ def placeCells(BOARD):
 
 
 # Draw filled rectangle at coordinates
-
 def drawButton(buttonStart):
     # elevation logic
     buttonStart.top_rect.y = buttonStart.y - buttonStart.elevation
@@ -148,6 +143,7 @@ def drawButton(buttonStart):
     _VARS['surf'].blit(buttonStart.text, buttonStart.text_rect)
 
 
+#chech start buttom is clicked
 def check_click(buttonStart):
     while(1):
         time.sleep(0)
@@ -167,6 +163,7 @@ def check_click(buttonStart):
             buttonStart.top_color = (0, 140, 51)
 
 
+#draw square
 def drawSquareCell(x, y, dimX, dimY, color):
     i = 0
     pygame.draw.rect(
@@ -175,6 +172,7 @@ def drawSquareCell(x, y, dimX, dimY, color):
     )
 
 
+#Draw grid
 def drawSquareGrid(origin, gridWH, cells):
 
     CONTAINER_WIDTH_HEIGHT = gridWH
@@ -219,7 +217,7 @@ def drawSquareGrid(origin, gridWH, cells):
             (cont_x, cont_y + (cellSize*x)),
             (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), 2)
 
-# Verifica que los eventos le den click
+#If is clicked
 def openFile():
     filepath = filedialog.askopenfilename(initialdir="C:\\Users\\Cakow\\PycharmProjects\\Main",
                                           title="Select one file",
@@ -229,7 +227,7 @@ def openFile():
     file.close()
     RushH(filepath)
     
-
+#Select file window
 def prompt_file():
     """Create a Tk file dialog and cleanup when finished"""
     global root
@@ -256,17 +254,18 @@ def prompt_file():
         activeforeground='White',
         font=('arial bold', 15)).pack(pady=20)
 
+#Shows file window
 def showRoot():
     root.deiconify()
 
-
+#Check events
 def checkEvents(BOARD, solution, pos_solution, buttonStart):
     global CURR_VEHICLE
     if(pos_solution < len(solution)):
         BOARD.boardMAP = solution[pos_solution].state
     else:
         BOARD.moveVehicleMain()
-    time.sleep(0.7)  # Here going to change for clickbutton
+    time.sleep(1)  # Se mueve cuando se presiona
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -277,7 +276,7 @@ def checkEvents(BOARD, solution, pos_solution, buttonStart):
         elif event.type == KEYDOWN and event.key == 103:
             BOARD.expandPossibleStates()
 
-
+#Main Function
 def RushH(file):
     global CURR_VEHICLE, buttonStart
 
@@ -302,11 +301,13 @@ def RushH(file):
     if(test == False):
         return
 
+    print(test)
+
     #Finish Time
     total_time = time.time() - start_time
 
     #Total Movements
-    movement = len(test)
+    movement = len(test)-1
 
     root.withdraw()
     pygame.init()
@@ -326,6 +327,7 @@ def RushH(file):
         if (tr.is_alive()):
             drawButton(buttonStart)
 
+        #Shows movements and time
         fontT = pygame.font.SysFont(None, 50)
         tittle2 = fontT.render('Rush Hour', True, '#277da1')
         _VARS['surf'].blit(tittle2, (350, 50))
@@ -347,6 +349,7 @@ def RushH(file):
             _VARS['gridOrigin'], _VARS['gridWH'], _VARS['gridCells'])
         placeCells(GAMEBOARD)
         pygame.display.update()
+        
         # CHECKS FOR WIN STATE
         if(length_solucion < len(test) and tr.is_alive() == False):
             length_solucion += 1
@@ -356,7 +359,7 @@ def RushH(file):
             # answer saves what user wants (yes, no)
             answer = messagebox.askquestion(title="¿Do you want to select another problem?",
                                             message="NOTE: If you don't, the actual problem will be repeated.")
-            # Se debe pasar al sig nivel
+            #Next level
             if(answer == 'yes'):
                 showRoot()
                 pygame.quit()
@@ -367,5 +370,6 @@ def RushH(file):
                 RushH(file)
                 return
 
+#Run program
 if __name__ == "__main__":
     prompt_file()
